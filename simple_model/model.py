@@ -17,9 +17,6 @@ class Model:
     def __init__(self, **kwargs):
         for field_name in self.fields:
             field_value = kwargs.get(field_name, None)
-            if field_name not in self.allow_empty and not field_value:
-                raise EmptyField(field_name)
-
             setattr(self, field_name, field_value)
 
     def is_empty(self, value):
