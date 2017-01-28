@@ -16,13 +16,15 @@ That's it. If you want something more complex there are plenty of libraries and 
 
 How to install
 --------------
-::
+.. code:: shell
+
     pip install pysimplemodel
 
 
 How to use
 ----------
-::
+.. code:: python
+
     class Person:
         fields = ('name', 'age', 'gender', 'height', 'weight')
         allow_empty = ('height', 'weight')
@@ -35,7 +37,8 @@ How to use
             if value not in ('M', 'F'):
                 raise ValidationError
 
-::
+.. code:: python
+
     >> person = Person(name='John Doe', age=18, gender='M')
     >> person.name
     'John Doe'
