@@ -10,7 +10,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='simplemodel',
+    name='pysimplemodel',
     version='0.0.1',
     description='Simple Models for Python',
     url='https://github.com/lamenzes/simple-model',

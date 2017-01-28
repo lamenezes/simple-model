@@ -14,6 +14,12 @@ It has simple objectives:
 That's it. If you want something more complex there are plenty of libraries and frameworks that does a lot of cool stuff.
 
 
+How to install
+--------------
+::
+    pip install pysimplemodel
+
+
 How to use
 ----------
 ::
