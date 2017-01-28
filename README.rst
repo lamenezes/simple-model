@@ -25,7 +25,11 @@ How to use
 ----------
 .. code:: python
 
-    class Person:
+    from simple_model import Model
+    from simple_model.exceptions import ValidationError
+
+
+    class Person(Model):
         fields = ('name', 'age', 'gender', 'height', 'weight')
         allow_empty = ('height', 'weight')
 
