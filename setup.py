@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pysimplemodel',
-    version='0.0.1',
+    version='0.0.2',
     description='Simple Models for Python',
     url='https://github.com/lamenzes/simple-model',
     author='Luiz Menezes',
