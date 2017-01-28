@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.so
+build/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+.coverage
+.coverage.*
+.cache
+coverage.xml
+*,cover
+*~
+[._]*.s[a-w][a-z]
