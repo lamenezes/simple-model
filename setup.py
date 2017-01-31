@@ -13,7 +13,7 @@ setup(
     name='pysimplemodel',
     version='0.0.2',
     description='Simple Models for Python',
-    url='https://github.com/lamenzes/simple-model',
+    url='https://github.com/lamenezes/simple-model',
     author='Luiz Menezes',
     author_email='luiz.menezesf@gmail.com',
     long_description=open('README.rst').read(),
