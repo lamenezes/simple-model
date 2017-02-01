@@ -2,6 +2,9 @@
 Simple Model
 ============
 
+.. image:: https://travis-ci.org/lamenezes/simple-model.svg?branch=master
+    :target: https://travis-ci.org/lamenezes/simple-model
+
 *SimpleModel* offers a simple way to handle data using classes instead of a
 plenty of lists and dicts.
 
