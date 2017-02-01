@@ -48,4 +48,12 @@ class Model:
 
     def serialize(self):
         self.validate()
-        return {field_name: getattr(self, field_name) for field_name in self.fields}
+        data = {}
+        for field_name in self.fields:
+            field_value = getattr(self, field_name)
+            if isinstance(field_value, Model):
+                field_value = field_value.serialize()
+
+            data[field_name] = field_value
+
+        return data

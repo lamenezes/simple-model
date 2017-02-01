@@ -77,7 +77,7 @@ def test_model_fields_field_validation_error_without_raise(model):
     assert model.validate(raise_exception=False) is False
 
 
-def test_model_serialzie(model):
+def test_model_serialize(model):
     serialized_model = {
         'foo': 'foo',
         'bar': 'bar',
@@ -85,3 +85,9 @@ def test_model_serialzie(model):
         'qux': '',
     }
     assert model.serialize() == serialized_model
+
+
+def test_model_serialize_model(model):
+    other_model = MyModel(foo='foo', bar=model)
+    serialized = other_model.serialize()
+    assert serialized == {'foo': 'foo', 'bar': model.serialize(), 'baz': None, 'qux': None}
