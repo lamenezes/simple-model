@@ -43,18 +43,18 @@ def test_model_fields_allow_empty():
 
 
 @pytest.mark.parametrize('empty_value', (None, '', 0))
-def test_model_fields_allow_empty_error(empty_value):
+def test_model_fields_validate_allow_empty_error(empty_value):
     with pytest.raises(EmptyField):
-        MyModel()
+        MyModel().validate()
 
     with pytest.raises(EmptyField):
-        MyModel(foo=empty_value)
+        MyModel(foo=empty_value).validate()
 
     with pytest.raises(EmptyField):
-        MyModel(bar=empty_value)
+        MyModel(bar=empty_value).validate()
 
     with pytest.raises(EmptyField):
-        MyModel(foo=empty_value, bar=empty_value)
+        MyModel(foo=empty_value, bar=empty_value).validate()
 
 
 def test_model_fields_field_validation(model):
