@@ -5,3 +5,4 @@ python:
 install: pip install -r requirements-test.txt
 before_script: "flake8 --ignore=E501 simple_model"
 script: "py.test"
+after_script: coveralls

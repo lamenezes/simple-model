@@ -53,8 +53,10 @@ def test_model_fields_validate_allow_empty_error(empty_value):
     with pytest.raises(EmptyField):
         MyModel(bar=empty_value).validate()
 
-    with pytest.raises(EmptyField):
+    with pytest.raises(EmptyField) as exc:
         MyModel(foo=empty_value, bar=empty_value).validate()
+
+    assert 'cannot be empty' in str(exc)
 
 
 def test_model_fields_field_validation(model):
