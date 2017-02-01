@@ -7,6 +7,8 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
+from typing import List
+
 from .exceptions import EmptyField, ValidationError
 
 
@@ -46,14 +48,18 @@ class Model:
 
         return True
 
+    def _serialize_field(self, field_value):
+        if isinstance(field_value, Model):
+            field_value = field_value.serialize()
+        elif isinstance(field_value, List):
+            field_value = [self._serialize_field(i) for i in field_value]
+        return field_value
+
     def serialize(self):
         self.validate()
         data = {}
         for field_name in self.fields:
             field_value = getattr(self, field_name)
-            if isinstance(field_value, Model):
-                field_value = field_value.serialize()
-
-            data[field_name] = field_value
+            data[field_name] = self._serialize_field(field_value)
 
         return data

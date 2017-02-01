@@ -91,3 +91,15 @@ def test_model_serialize_model(model):
     other_model = MyModel(foo='foo', bar=model)
     serialized = other_model.serialize()
     assert serialized == {'foo': 'foo', 'bar': model.serialize(), 'baz': None, 'qux': None}
+
+
+def test_model_serialize_model_list(model):
+    other_model = MyModel(foo='foo', bar=[model] * 5)
+    serialized = other_model.serialize()
+    expected = {
+        'foo': 'foo',
+        'bar': [model.serialize()] * 5,
+        'baz': None,
+        'qux': None
+    }
+    assert serialized == expected
