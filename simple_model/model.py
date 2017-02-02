@@ -7,7 +7,7 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
-from typing import List, Set
+from typing import List
 
 from .exceptions import EmptyField, ValidationError
 
@@ -51,7 +51,7 @@ class Model:
     def _serialize_field(self, field_value):
         if isinstance(field_value, Model):
             field_value = field_value.serialize()
-        elif isinstance(field_value, (List, tuple, Set)):
+        elif isinstance(field_value, (List, tuple)):
             field_value = [self._serialize_field(i) for i in field_value]
         return field_value
 

@@ -100,7 +100,7 @@ def test_model_serialize_nested(model):
     assert serialized == {'foo': 'foo', 'bar': model.serialize(), 'baz': None, 'qux': None}
 
 
-@pytest.mark.parametrize('iterable', (list, set, tuple))
+@pytest.mark.parametrize('iterable', (list, tuple))
 def test_model_serialize_nested_iterable(iterable, model, model2):
     other_model = MyModel(foo='foo', bar=iterable([model, model2]))
     serialized = other_model.serialize()
