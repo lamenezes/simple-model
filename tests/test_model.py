@@ -111,3 +111,8 @@ def test_model_serialize_nested_iterable(iterable, model, model2):
         'qux': None
     }
     assert serialized == expected
+
+
+def test_model_serialize_exclude_fields(model):
+    serialized = model.serialize(exclude_fields=('baz', 'qux'))
+    assert serialized == {'foo': 'foo', 'bar': 'bar'}

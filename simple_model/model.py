@@ -55,10 +55,14 @@ class Model:
             field_value = [self._serialize_field(i) for i in field_value]
         return field_value
 
-    def serialize(self):
+    def serialize(self, exclude_fields=None):
         self.validate()
+
         data = {}
         for field_name in self.fields:
+            if exclude_fields and field_name in exclude_fields:
+                continue
+
             field_value = getattr(self, field_name)
             data[field_name] = self._serialize_field(field_value)
 
