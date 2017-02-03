@@ -22,6 +22,11 @@ class MyModel(Model):
             raise ValidationError()
 
 
+class MyEmptyModel(Model):
+    fields = MyModel.fields
+    allow_empty = '__all__'
+
+
 @pytest.fixture
 def model():
     return MyModel(foo='foo', bar='bar', baz='', qux='')
@@ -43,6 +48,17 @@ def test_model_fields_allow_empty():
     model = MyModel(foo='foo', bar='bar')
     assert model.foo == 'foo'
     assert model.bar == 'bar'
+    assert model.baz is None
+    assert model.qux is None
+
+
+def test_model_fields_allow_empty__all__():
+    model = MyEmptyModel()
+
+    model.validate()
+
+    assert model.foo is None
+    assert model.bar is None
     assert model.baz is None
     assert model.qux is None
 

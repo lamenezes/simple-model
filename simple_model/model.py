@@ -28,7 +28,7 @@ class Model:
         for field_name in self.fields:
             value = getattr(self, field_name)
 
-            allow_empty = field_name in self.allow_empty
+            allow_empty = '__all__' in self.allow_empty or field_name in self.allow_empty
             if not allow_empty and not self.is_empty(value):
                 if raise_exception:
                     raise EmptyField(field_name)
