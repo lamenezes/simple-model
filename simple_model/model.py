@@ -13,9 +13,11 @@ from .exceptions import EmptyField, ValidationError
 
 
 class ModelField:
-    def __init__(self, name, value):
+    def __init__(self, model, name, value, allow_empty):
+        self._model = model
         self.name = name
         self.value = value
+        self.allow_empty = allow_empty
 
     def serialize(self):
         serialized = None
@@ -36,8 +38,10 @@ class Model:
             setattr(self, field_name, field_value)
 
     def _get_fields(self):
-        return (ModelField(field_name, getattr(self, field_name))
-                for field_name in self.fields)
+        for field_name in self.fields:
+            allow_empty = '__all__' in self.allow_empty or field_name in self.allow_empty
+            field_value = getattr(self, field_name)
+            yield ModelField(self, field_name, field_value, allow_empty)
 
     def is_empty(self, value):
         return bool(value)

@@ -37,6 +37,11 @@ def model2():
     return MyModel(foo='f00', bar='barbar', baz='', qux='')
 
 
+@pytest.fixture
+def model_field(model):
+    return ModelField(model, name='bar', value=1, allow_empty=True)
+
+
 def test_model_fields(model):
     assert model.foo == 'foo'
     assert model.bar == 'bar'
@@ -123,20 +128,20 @@ def test_model_serialize_nested_list(iterable, model, model2):
     assert serialized == expected
 
 
-def test_model_field_serialize_simple(model):
-    field = ModelField('bar', 1)
-    assert field.serialize() == 1
+def test_model_field_serialize_simple(model_field):
+    model_field.value = 1
+    assert model_field.serialize() == 1
 
 
-def test_model_field_serialize_nested(model):
-    field = ModelField('bar', model)
-    assert field.serialize() == model.serialize()
+def test_model_field_serialize_nested(model, model_field):
+    model_field.value = model
+    assert model_field.serialize() == model.serialize()
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))
-def test_model_field_serialize_nested_iterable(iterable, model, model2):
-    field = ModelField('bar', iterable([model, model2]))
-    assert field.serialize() == [model.serialize(), model2.serialize()]
+def test_model_field_serialize_nested_iterable(iterable, model_field, model, model2):
+    model_field.value = iterable([model, model2])
+    assert model_field.serialize() == [model.serialize(), model2.serialize()]
 
 
 def test_model_serialize_exclude_fields(model):
