@@ -9,7 +9,7 @@
 
 import pytest
 
-from simple_model import Model
+from simple_model.model import Model, ModelField
 from simple_model.exceptions import EmptyField, ValidationError
 
 
@@ -100,7 +100,7 @@ def test_model_fields_field_validation_error_without_raise(model):
     assert model.validate(raise_exception=False) is False
 
 
-def test_model_serialize(model):
+def test_model_serialize_simple(model):
     serialized_model = {
         'foo': 'foo',
         'bar': 'bar',
@@ -110,23 +110,33 @@ def test_model_serialize(model):
     assert model.serialize() == serialized_model
 
 
-def test_model_serialize_nested(model):
-    other_model = MyModel(foo='foo', bar=model)
-    serialized = other_model.serialize()
-    assert serialized == {'foo': 'foo', 'bar': model.serialize(), 'baz': None, 'qux': None}
-
-
 @pytest.mark.parametrize('iterable', (list, tuple))
-def test_model_serialize_nested_iterable(iterable, model, model2):
-    other_model = MyModel(foo='foo', bar=iterable([model, model2]))
+def test_model_serialize_nested_list(iterable, model, model2):
+    other_model = MyModel(foo='foo', bar=iterable([model, model2]), baz=model)
     serialized = other_model.serialize()
     expected = {
         'foo': 'foo',
         'bar': [model.serialize(), model2.serialize()],
-        'baz': None,
+        'baz': model.serialize(),
         'qux': None
     }
     assert serialized == expected
+
+
+def test_model_field_serialize_simple(model):
+    field = ModelField('bar', 1)
+    assert field.serialize() == 1
+
+
+def test_model_field_serialize_nested(model):
+    field = ModelField('bar', model)
+    assert field.serialize() == model.serialize()
+
+
+@pytest.mark.parametrize('iterable', (list, tuple))
+def test_model_field_serialize_nested_iterable(iterable, model, model2):
+    field = ModelField('bar', iterable([model, model2]))
+    assert field.serialize() == [model.serialize(), model2.serialize()]
 
 
 def test_model_serialize_exclude_fields(model):
