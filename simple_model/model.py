@@ -7,25 +7,8 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
-from typing import List
-
 from .exceptions import EmptyField, ValidationError
-
-
-class ModelField:
-    def __init__(self, model, name, value, allow_empty):
-        self._model = model
-        self.name = name
-        self.value = value
-        self.allow_empty = allow_empty
-
-    def serialize(self):
-        serialized = None
-        if isinstance(self.value, Model):
-            serialized = self.value.serialize()
-        elif isinstance(self.value, (List, tuple)):
-            serialized = [field.serialize() for field in self.value]
-        return serialized or self.value
+from .field import ModelField
 
 
 class Model:

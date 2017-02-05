@@ -9,37 +9,9 @@
 
 import pytest
 
-from simple_model.model import Model, ModelField
 from simple_model.exceptions import EmptyField, ValidationError
 
-
-class MyModel(Model):
-    fields = ('foo', 'bar', 'baz', 'qux')
-    allow_empty = ('baz', 'qux')
-
-    def validate_foo(self, value):
-        if len(value) != 3:
-            raise ValidationError()
-
-
-class MyEmptyModel(Model):
-    fields = MyModel.fields
-    allow_empty = '__all__'
-
-
-@pytest.fixture
-def model():
-    return MyModel(foo='foo', bar='bar', baz='', qux='')
-
-
-@pytest.fixture
-def model2():
-    return MyModel(foo='f00', bar='barbar', baz='', qux='')
-
-
-@pytest.fixture
-def model_field(model):
-    return ModelField(model, name='bar', value=1, allow_empty=True)
+from .conftest import MyModel, MyEmptyModel
 
 
 def test_model_fields(model):
@@ -126,24 +98,3 @@ def test_model_serialize_nested_list(iterable, model, model2):
         'qux': None
     }
     assert serialized == expected
-
-
-def test_model_field_serialize_simple(model_field):
-    model_field.value = 1
-    assert model_field.serialize() == 1
-
-
-def test_model_field_serialize_nested(model, model_field):
-    model_field.value = model
-    assert model_field.serialize() == model.serialize()
-
-
-@pytest.mark.parametrize('iterable', (list, tuple))
-def test_model_field_serialize_nested_iterable(iterable, model_field, model, model2):
-    model_field.value = iterable([model, model2])
-    assert model_field.serialize() == [model.serialize(), model2.serialize()]
-
-
-def test_model_serialize_exclude_fields(model):
-    serialized = model.serialize(exclude_fields=('baz', 'qux'))
-    assert serialized == {'foo': 'foo', 'bar': 'bar'}
