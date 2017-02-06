@@ -19,6 +19,7 @@ def test_model_fields(model):
     assert model.bar == 'bar'
     assert model.baz == ''
     assert model.qux == ''
+    assert 'foo' in repr(model)
 
 
 def test_model_fields_allow_empty():

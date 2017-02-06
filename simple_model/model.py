@@ -21,6 +21,9 @@ class Model:
             field_value = kwargs.get(field_name, None)
             setattr(self, field_name, field_value)
 
+    def __repr__(self):
+        return '{}(fields={!r})'.format(type(self).__name__, list(self._get_fields()))
+
     def _get_fields(self):
         for field_name in self.fields:
             allow_empty = '__all__' in self.allow_empty or field_name in self.allow_empty

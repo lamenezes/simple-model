@@ -24,6 +24,12 @@ class ModelField:
         except AttributeError:
             self._validate = None
 
+    def __repr__(self):
+        return '{}({}={!r})'.format(type(self).__name__, self.name, self.value)
+
+    def __str__(self):
+        return str(self.value)
+
     def validate(self):
         if not self.allow_empty and not self._model.is_empty(self.value):
             raise EmptyField(self.name)
