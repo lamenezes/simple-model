@@ -15,8 +15,8 @@ from .exceptions import EmptyField
 class ModelField:
     def __init__(self, model, name, value, allow_empty):
         self._model = model
-        self.name = name
-        self.value = value
+        self._name = name
+        self._value = value
         self.allow_empty = allow_empty
 
         try:
@@ -34,6 +34,25 @@ class ModelField:
 
     def __str__(self):
         return str(self.value)
+
+    def _set_model_value(self, value):
+        if value is self._model:
+            raise TypeError('Cannot set {!r} value to the model it is part of'.format(self))
+
+        setattr(self._model, self.name, value)
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
+        self._set_model_value(value)
 
     def clean(self):
         if not self._clean:
