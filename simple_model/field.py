@@ -24,11 +24,22 @@ class ModelField:
         except AttributeError:
             self._validate = None
 
+        try:
+            self._clean = getattr(model, 'clean_{}'.format(name))
+        except AttributeError:
+            self._clean = None
+
     def __repr__(self):
         return '{}({}={!r})'.format(type(self).__name__, self.name, self.value)
 
     def __str__(self):
         return str(self.value)
+
+    def clean(self):
+        if not self._clean:
+            return self.value
+
+        self.value = self._clean(self.value)
 
     def validate(self):
         if not self.allow_empty and not self._model.is_empty(self.value):

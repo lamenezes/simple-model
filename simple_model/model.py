@@ -33,6 +33,11 @@ class Model:
     def is_empty(self, value):
         return bool(value)
 
+    def clean(self):
+        for field in self._get_fields():
+            field.clean()
+            setattr(self, field.name, field.value)
+
     def validate(self, raise_exception=True):
         for field in self._get_fields():
             try:

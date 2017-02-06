@@ -71,3 +71,21 @@ def test_model_field_validate_empty_field(model_field, blank_value):
     model_field.value = blank_value
     with pytest.raises(EmptyField):
         model_field.validate()
+
+
+def test_model_field_clean(model_field):
+    model_field._clean = lambda s: s.strip()
+    model_field.value = ' foo '
+
+    model_field.clean()
+
+    assert model_field.value == 'foo'
+
+
+def test_model_field_clean_without_clean_method(model_field):
+    model_field._clean = None
+    model_field.value = ' foo '
+
+    model_field.clean()
+
+    assert model_field.value == ' foo '

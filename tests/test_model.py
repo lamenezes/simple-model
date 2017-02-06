@@ -104,3 +104,24 @@ def test_model_serialize_nested_list(iterable, model, model2):
 def test_model_serialize_exclude_fields(model):
     serialized = model.serialize(exclude_fields=('baz', 'qux'))
     assert serialized == {'foo': 'foo', 'bar': 'bar'}
+
+
+def test_model_clean_without_clean_method(model):
+    for field_name in model.fields:
+        setattr(model, field_name, field_name)
+
+    model.clean()
+
+    for field_name in model.fields:
+        assert getattr(model, field_name) == field_name
+
+
+def test_model_clean(model):
+    for field_name in model.fields:
+        setattr(model, field_name, ' {} '.format(field_name))
+        setattr(model, 'clean_{}'.format(field_name), lambda s: s.strip())
+
+    model.clean()
+
+    for field_name in model.fields:
+        assert getattr(model, field_name) == field_name
