@@ -58,7 +58,7 @@ def test_model_fields_validate_allow_empty_error(empty_value):
 
 
 def test_model_fields_field_validation(model):
-    assert model.validate() is True
+    assert model.validate() is None
 
 
 def test_model_fields_field_validation_without_raise(model):

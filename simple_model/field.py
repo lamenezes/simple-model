@@ -9,6 +9,8 @@
 
 from typing import List
 
+from .exceptions import EmptyField
+
 
 class ModelField:
     def __init__(self, model, name, value, allow_empty):
@@ -23,6 +25,9 @@ class ModelField:
             self._validate = None
 
     def validate(self):
+        if not self.allow_empty and not self._model.is_empty(self.value):
+            raise EmptyField(self.name)
+
         if not self._validate:
             return
 

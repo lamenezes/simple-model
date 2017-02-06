@@ -7,7 +7,7 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
-from .exceptions import EmptyField, ValidationError
+from .exceptions import ValidationError
 from .field import ModelField
 
 
@@ -32,12 +32,6 @@ class Model:
 
     def validate(self, raise_exception=True):
         for field in self._get_fields():
-            allow_empty = '__all__' in self.allow_empty or field.name in self.allow_empty
-            if not allow_empty and not self.is_empty(field.value):
-                if raise_exception:
-                    raise EmptyField(field.name)
-                return False
-
             try:
                 field.validate()
             except ValidationError:
@@ -45,7 +39,7 @@ class Model:
                     raise
                 return False
 
-        return True
+        return None if raise_exception else True
 
     def serialize(self, exclude_fields=None):
         self.validate()
