@@ -14,6 +14,7 @@ from .field import ModelField
 class Model:
     fields = ()
     allow_empty = ()
+    _field_class = ModelField
 
     def __init__(self, **kwargs):
         for field_name in self.fields:
@@ -24,7 +25,7 @@ class Model:
         for field_name in self.fields:
             allow_empty = '__all__' in self.allow_empty or field_name in self.allow_empty
             field_value = getattr(self, field_name)
-            yield ModelField(self, field_name, field_value, allow_empty)
+            yield self._field_class(self, field_name, field_value, allow_empty)
 
     def is_empty(self, value):
         return bool(value)
