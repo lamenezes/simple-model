@@ -14,7 +14,7 @@ plenty of lists and dicts.
 
 It has simple objectives:
 
-- Define your fields easily (just a tuple, not dicts or instances from type classes whatever)
+- Define your fields easily (just a tuple, not dicts or instances of type classes whatever)
 - Support for field validation
 - Serialize to dict
 
