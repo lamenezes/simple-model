@@ -18,7 +18,8 @@ It has simple objectives:
 - Support for field validation
 - Serialize to dict
 
-That's it. If you want something more complex there are plenty of libraries and frameworks that does a lot of cool stuff.
+That's it. If you want something more complex there are plenty of libraries and
+frameworks that does a lot of cool stuff.
 
 --------------
 How to install
@@ -66,16 +67,17 @@ Validation
 Model values aren't validated until the `validated` method is called:
 
 .. code:: python
-    
+
     >> person = Person()  # no exception
     >> person.validate()
     ...
     EmptyField: name field cannot be empty
     >> person = Person(name='Jane Doe', age=60, gender='F')
     >> person.validate()  # now it's ok!
-    
 
-You may change the validate method to return a boolean instead of raising an exception:
+
+You may change the validate method to return a boolean instead of raising an
+exception:
 
 .. code:: python
 
@@ -85,10 +87,31 @@ You may change the validate method to return a boolean instead of raising an exc
     >>> person = Person(name='Jane Doe', age=60, gender='F')
     >>> person.validate(raise_exception=False)
     True
-   
-Custom validation can make your simple models awesome:  
+
+
+Cleaning
+--------
+
+Sometimes it is necessary to clean some values of your models, this can be
+easily done using simple-model:
 
 .. code:: python
+
+    class CleanPerson(Model):
+        fields = ('name', 'gender')
+
+        def clean_name(self, value):
+            return value.strip()
+
+        def clean_gender(self, value):
+            return value.upper()
+
+    >> person = CleanPerson(name='John Doe  \n', gender='m')
+    >> person.name, person.gender
+    ('John Doe  \n', 'm')
+    >> person.clean()
+    >> person.name, person.gender
+    ('John Doe', 'M')
 
 
 Serialization
@@ -97,36 +120,41 @@ Serialization
 Simple serialization is pretty straight-forward:
 
 .. code:: python
+
     >> person = Person(name='Jane Doe', age=60, gender='F')
     >> person.serialize()
     {'age': 60, 'gender': 'F', 'height': None, 'name': 'Jane Doe', 'weight': None}
-    
-You may also hide some fields from serialization by passing a list to the `serialize` method:
+
+You may also hide some fields from serialization by passing a list to the
+`serialize` method:
+
 
 .. code:: python
+
     >> person.serialize(exclude_fields=('gender', 'weight'))
     {'age': 60, 'height': None, 'name': 'Jane Doe'}
-    
+
 Simple model also supports nested models:
+
 
 .. code:: python
 
     class SocialPerson(Model):
         fields = ('name', 'friend')
-        
+
     >> person = Person(name='Jane Doe', age=60, gender='F')
     >> other_person = SocialPerson(name='John Doe', friend=person)
     >> other_person.serialize()
     {'friend': {'age': 60, 'gender': 'F', 'height': None, 'name': 'Jane Doe', 'weight': None}, 'name': 'John Doe'}
-    
-    
+
+
 It also supports nested models as lists:
 
 .. code:: python
 
     class MoreSocialPerson(Model):
         fields = ('name', 'friends')
-        
+
     >> person = Person(name='Jane Doe', age=60, gender='F')
     >> other_person = Person(name='John Doe', age=15, gender='M')
     >> social_person = MoreSocialPerson(name='Foo Bar', friends=[person, other_person])
