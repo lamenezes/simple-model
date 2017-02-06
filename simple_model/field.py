@@ -52,11 +52,16 @@ class ModelField:
 
     def serialize(self):
         try:
-            serialized = self.value.serialize()
+            return self.value.serialize()
         except AttributeError:
             serialized = None
 
         if isinstance(self.value, (List, tuple)):
-            serialized = [field.serialize() for field in self.value]
+            serialized = []
+            for value in self.value:
+                try:
+                    serialized.append(value.serialize())
+                except AttributeError:
+                    serialized.append(value)
 
-        return serialized or self.value
+        return self.value if serialized is None else serialized

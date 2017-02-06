@@ -49,6 +49,18 @@ def test_model_field_serialize_nested_iterable(iterable, model_field, model, mod
     assert model_field.serialize() == [model.serialize(), model2.serialize()]
 
 
+@pytest.mark.parametrize('iterable', (list, tuple))
+def test_model_field_serialize_iterable_empty(iterable, model_field, model, model2):
+    model_field.value = iterable([])
+    assert model_field.serialize() == []
+
+
+@pytest.mark.parametrize('iterable', (list, tuple))
+def test_model_field_serialize_iterable(iterable, model_field, model, model2):
+    model_field.value = iterable([1, 2, 3])
+    assert model_field.serialize() == [1, 2, 3]
+
+
 def test_model_field_validate(model_field):
     validate = mock.MagicMock(return_value=None)
     model_field._validate = validate
