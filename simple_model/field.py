@@ -17,6 +17,17 @@ class ModelField:
         self.value = value
         self.allow_empty = allow_empty
 
+        try:
+            self._validate = getattr(model, 'validate_{}'.format(name))
+        except AttributeError:
+            self._validate = None
+
+    def validate(self):
+        if not self._validate:
+            return
+
+        self._validate(self.value)
+
     def serialize(self):
         try:
             serialized = self.value.serialize()

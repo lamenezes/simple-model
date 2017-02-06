@@ -39,12 +39,7 @@ class Model:
                 return False
 
             try:
-                validate_field = getattr(self, 'validate_{}'.format(field.name))
-            except AttributeError:
-                continue
-
-            try:
-                validate_field(field.value)
+                field.validate()
             except ValidationError:
                 if raise_exception:
                     raise

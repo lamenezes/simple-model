@@ -7,9 +7,16 @@
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
 
+from unittest import mock
+
 import pytest
 
+from simple_model.exceptions import EmptyField, ValidationError
 from simple_model.model import ModelField
+
+
+class MyValidationError(ValidationError):
+    pass
 
 
 @pytest.fixture
@@ -33,6 +40,17 @@ def test_model_field_serialize_nested_iterable(iterable, model_field, model, mod
     assert model_field.serialize() == [model.serialize(), model2.serialize()]
 
 
-def test_model_serialize_exclude_fields(model):
-    serialized = model.serialize(exclude_fields=('baz', 'qux'))
-    assert serialized == {'foo': 'foo', 'bar': 'bar'}
+def test_model_field_validate(model_field):
+    validate = mock.MagicMock(return_value=None)
+    model_field._validate = validate
+
+    assert model_field.validate() is None
+
+
+@pytest.mark.parametrize('exception', (ValidationError, EmptyField, MyValidationError))
+def test_model_field_validate_validation_error(model_field, exception):
+    validate = mock.MagicMock(side_effect=exception('foo'))
+    model_field._validate = validate
+
+    with pytest.raises(exception):
+        model_field.validate()
