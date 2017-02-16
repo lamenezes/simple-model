@@ -51,6 +51,7 @@ class Model:
 
     def serialize(self, exclude_fields=None):
         self.validate()
+        self.clean()
 
         data = {}
         for field in self._get_fields():

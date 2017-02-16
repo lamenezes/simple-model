@@ -125,3 +125,10 @@ def test_model_clean(model):
 
     for field_name in model.fields:
         assert getattr(model, field_name) == field_name
+
+
+def test_model_serialize_clean(model):
+    model.bar = ' bar '
+    model.clean_bar = lambda f: f.strip()
+    serialized = model.serialize()
+    assert serialized == {'foo': 'foo', 'bar': 'bar', 'baz': '', 'qux': ''}
