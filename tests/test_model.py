@@ -20,6 +20,8 @@ def test_model_fields(model):
     assert model.baz == ''
     assert model.qux == ''
     assert 'foo' in repr(model)
+    for k, v in model:
+        assert k in model.fields
 
 
 def test_model_fields_allow_empty():

@@ -21,6 +21,9 @@ class Model:
             field_value = kwargs.get(field_name, None)
             setattr(self, field_name, field_value)
 
+    def __iter__(self):
+        return ((field.name, field.value) for field in self._get_fields())
+
     def __repr__(self):
         return '{}(fields={!r})'.format(type(self).__name__, list(self._get_fields()))
 
