@@ -4,10 +4,10 @@ Simple Model
 
 .. image:: https://travis-ci.org/lamenezes/simple-model.svg?branch=master
     :target: https://travis-ci.org/lamenezes/simple-model
-
 .. image:: https://coveralls.io/repos/github/lamenezes/simple-model/badge.svg?branch=master
     :target: https://coveralls.io/github/lamenezes/simple-model?branch=master
-
+.. image:: https://badge.fury.io/py/pysimplemodel.svg
+    :target: https://badge.fury.io/py/pysimplemodel
 
 *SimpleModel* offers a simple way to handle data using classes instead of a
 plenty of lists and dicts.
