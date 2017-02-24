@@ -107,10 +107,10 @@ easily done using simple-model:
             return int(value)
 
     >> person = CleanPerson(name='John Doe  \n', age='10')
-    >> person.name, person.gender
+    >> person.name, person.age
     ('John Doe  \n', '10')
     >> person.clean()
-    >> person.name, person.gender
+    >> person.name, person.age
     ('John Doe', 10)
 
 
