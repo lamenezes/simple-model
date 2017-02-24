@@ -40,25 +40,25 @@ How to use
 
 
     class Person(Model):
-        fields = ('name', 'age', 'gender', 'height', 'weight')
+        fields = ('name', 'age', 'height', 'weight')
         allow_empty = ('height', 'weight')
 
         def validate_age(self, value):
             if 0 > value > 150:
                 raise ValidationError
 
-        def validate_gender(self, value):
-            if value not in ('M', 'F'):
+        def validate_height(self, value):
+            if value <= 0:
                 raise ValidationError
 
 .. code:: python
 
-    >> person = Person(name='John Doe', age=18, gender='M')
+    >> person = Person(name='John Doe', age=18)
     >> person.name
     'John Doe'
     >> person.validate()
     >> person.serialize()
-    {'name': 'John Doe', 'age': 18, 'gender': 'M', 'height': '', 'weight': ''}
+    {'name': 'John Doe', 'age': 18, 'height': '', 'weight': ''}
 
 
 Validation
@@ -72,7 +72,7 @@ Model values aren't validated until the `validated` method is called:
     >> person.validate()
     ...
     EmptyField: name field cannot be empty
-    >> person = Person(name='Jane Doe', age=60, gender='F')
+    >> person = Person(name='Jane Doe', age=60)
     >> person.validate()  # now it's ok!
 
 
@@ -84,7 +84,7 @@ exception:
     >> person = Person()
     >> person.validate(raise_exception=False)
     False
-    >>> person = Person(name='Jane Doe', age=60, gender='F')
+    >>> person = Person(name='Jane Doe', age=60)
     >>> person.validate(raise_exception=False)
     True
 
@@ -98,20 +98,20 @@ easily done using simple-model:
 .. code:: python
 
     class CleanPerson(Model):
-        fields = ('name', 'gender')
+        fields = ('name', 'age')
 
         def clean_name(self, value):
             return value.strip()
+            
+        def clean_age(self, value):
+            return int(value)
 
-        def clean_gender(self, value):
-            return value.upper()
-
-    >> person = CleanPerson(name='John Doe  \n', gender='m')
+    >> person = CleanPerson(name='John Doe  \n', age='10')
     >> person.name, person.gender
-    ('John Doe  \n', 'm')
+    ('John Doe  \n', '10')
     >> person.clean()
     >> person.name, person.gender
-    ('John Doe', 'M')
+    ('John Doe', 10)
 
 
 Serialization
@@ -121,9 +121,9 @@ Simple serialization is pretty straight-forward:
 
 .. code:: python
 
-    >> person = Person(name='Jane Doe', age=60, gender='F')
+    >> person = Person(name='Jane Doe', age=60)
     >> person.serialize()
-    {'age': 60, 'gender': 'F', 'height': None, 'name': 'Jane Doe', 'weight': None}
+    {'age': 60, 'height': None, 'name': 'Jane Doe', 'weight': None}
 
 You may also hide some fields from serialization by passing a list to the
 `serialize` method:
@@ -131,8 +131,8 @@ You may also hide some fields from serialization by passing a list to the
 
 .. code:: python
 
-    >> person.serialize(exclude_fields=('gender', 'weight'))
-    {'age': 60, 'height': None, 'name': 'Jane Doe'}
+    >> person.serialize(exclude_fields=('weight', 'age'))
+    {'height': None, 'name': 'Jane Doe'}
 
 Simple model also supports nested models:
 
@@ -142,10 +142,10 @@ Simple model also supports nested models:
     class SocialPerson(Model):
         fields = ('name', 'friend')
 
-    >> person = Person(name='Jane Doe', age=60, gender='F')
+    >> person = Person(name='Jane Doe', age=60)
     >> other_person = SocialPerson(name='John Doe', friend=person)
     >> other_person.serialize()
-    {'friend': {'age': 60, 'gender': 'F', 'height': None, 'name': 'Jane Doe', 'weight': None}, 'name': 'John Doe'}
+    {'friend': {'age': 60, 'height': None, 'name': 'Jane Doe', 'weight': None}, 'name': 'John Doe'}
 
 
 It also supports nested models as lists:
@@ -155,22 +155,20 @@ It also supports nested models as lists:
     class MoreSocialPerson(Model):
         fields = ('name', 'friends')
 
-    >> person = Person(name='Jane Doe', age=60, gender='F')
-    >> other_person = Person(name='John Doe', age=15, gender='M')
+    >> person = Person(name='Jane Doe', age=60)
+    >> other_person = Person(name='John Doe', age=15)
     >> social_person = MoreSocialPerson(name='Foo Bar', friends=[person, other_person])
     {
         'name': 'Foo Bar',
         'friends': [
             {
                 'age': 60,
-                'gender': 'F',
                 'height': None,
                 'name': 'Jane Doe',
                 'weight': None
             },
             {
                 'age': 15,
-                'gender': 'M',
                 'height': None,
                 'name': 'John Doe',
                 'weight': None
