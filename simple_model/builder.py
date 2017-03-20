@@ -1,10 +1,10 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from .model import Model
 from .utils import camel_case
 
 
-def model_class_builder(name, data):
+def model_class_builder(name: str, data: Any) -> type:
     attrs = {
         'allow_empty': '__all__',
         'fields': tuple(data.keys()),
@@ -13,7 +13,7 @@ def model_class_builder(name, data):
     return new_class
 
 
-def model_builder(name, data, recurse=True):
+def model_builder(name: str, data: Any, recurse: bool=True) -> Model:
     parent_class = model_class_builder(name, data)
     instance = parent_class(**data)
 

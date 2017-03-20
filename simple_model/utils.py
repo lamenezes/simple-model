@@ -1,8 +1,8 @@
-def capitalize_first(string):
+def capitalize_first(string: str) -> str:
     return string[0].upper() + string[1:]
 
 
-def camel_case(string):
+def camel_case(string: str) -> str:
     string = capitalize_first(string)
     for separator in ('_', '-', ' '):
         if separator not in string:
