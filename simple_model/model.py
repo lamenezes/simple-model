@@ -1,3 +1,5 @@
+from typing import Any, Dict, Iterator, Iterable, Tuple, Union
+
 from .exceptions import ValidationError
 from .field import ModelField
 
@@ -12,10 +14,10 @@ class Model:
             field_value = kwargs.get(field_name, None)
             setattr(self, field_name, field_value)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Tuple[str, Any]]:
         return ((field.name, field.value) for field in self._get_fields())
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '{}(fields={!r})'.format(type(self).__name__, list(self._get_fields()))
 
     def _get_fields(self):
@@ -24,15 +26,15 @@ class Model:
             field_value = getattr(self, field_name)
             yield self._field_class(self, field_name, field_value, allow_empty)
 
-    def is_empty(self, value):
+    def is_empty(self, value: Any) -> bool:
         return bool(value)
 
-    def clean(self):
+    def clean(self) -> None:
         for field in self._get_fields():
             field.clean()
             setattr(self, field.name, field.value)
 
-    def validate(self, raise_exception=True):
+    def validate(self, raise_exception: bool=True) -> Union[None, bool]:
         for field in self._get_fields():
             try:
                 field.validate()
@@ -43,7 +45,7 @@ class Model:
 
         return None if raise_exception else True
 
-    def serialize(self, exclude_fields=None):
+    def serialize(self, exclude_fields: Iterable=None) -> Dict[str, Any]:
         self.validate()
         self.clean()
 
