@@ -1,6 +1,7 @@
 import pytest
 
 from simple_model.exceptions import EmptyField, ValidationError
+from simple_model import Model
 
 from .conftest import MyModel, MyEmptyModel
 
@@ -125,3 +126,28 @@ def test_model_serialize_clean(model):
     model.clean_bar = lambda f: f.strip()
     serialized = model.serialize()
     assert serialized == {'foo': 'foo', 'bar': 'bar', 'baz': '', 'qux': ''}
+
+
+def test_model_get_fields():
+    class MyGetFieldsModel(MyModel):
+        def get_fields(self):
+            return super().fields + ('birl',)
+
+    model = MyGetFieldsModel(foo='foo', bar='bar', birl='birl')
+    assert model.validate(raise_exception=False)
+
+
+def test_model_get_fields_invalid():
+    with pytest.raises(AssertionError) as exc:
+        Model()
+
+    assert 'should include a fields attr' in str(exc)
+
+
+def test_model_get_allow_empty():
+    class MyGetFieldsModel(MyModel):
+        def get_allow_empty(self):
+            return super().allow_empty + ('bar',)
+
+    model = MyGetFieldsModel(foo='foo')
+    assert model.validate(raise_exception=False)
