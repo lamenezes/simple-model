@@ -15,7 +15,7 @@ def test_model_class_builder():
 
     assert birl.clean() is None
     assert birl.validate(raise_exception=False) is True
-    assert birl.serialize() == {'f': None, 'b': None}
+    assert birl.as_dict() == {'f': None, 'b': None}
 
 
 def test_model_builder():

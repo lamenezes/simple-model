@@ -72,32 +72,32 @@ def test_model_fields_field_validation_error_without_raise(model):
     assert model.validate(raise_exception=False) is False
 
 
-def test_model_serialize_simple(model):
-    serialized_model = {
+def test_model_as_dict_simple(model):
+    as_dict_model = {
         'foo': 'foo',
         'bar': 'bar',
         'baz': '',
         'qux': '',
     }
-    assert model.serialize() == serialized_model
+    assert model.as_dict() == as_dict_model
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))
-def test_model_serialize_nested_list(iterable, model, model2):
+def test_model_as_dict_nested_list(iterable, model, model2):
     other_model = MyModel(foo='foo', bar=iterable([model, model2]), baz=model)
-    serialized = other_model.serialize()
+    as_dict = other_model.as_dict()
     expected = {
         'foo': 'foo',
-        'bar': [model.serialize(), model2.serialize()],
-        'baz': model.serialize(),
+        'bar': [model.as_dict(), model2.as_dict()],
+        'baz': model.as_dict(),
         'qux': None
     }
-    assert serialized == expected
+    assert as_dict == expected
 
 
-def test_model_serialize_exclude_fields(model):
-    serialized = model.serialize(exclude_fields=('baz', 'qux'))
-    assert serialized == {'foo': 'foo', 'bar': 'bar'}
+def test_model_as_dict_exclude_fields(model):
+    as_dict = model.as_dict(exclude_fields=('baz', 'qux'))
+    assert as_dict == {'foo': 'foo', 'bar': 'bar'}
 
 
 def test_model_clean_without_clean_method(model):
@@ -121,11 +121,11 @@ def test_model_clean(model):
         assert getattr(model, field_name) == field_name
 
 
-def test_model_serialize_clean(model):
+def test_model_as_dict_clean(model):
     model.bar = ' bar '
     model.clean_bar = lambda f: f.strip()
-    serialized = model.serialize()
-    assert serialized == {'foo': 'foo', 'bar': 'bar', 'baz': '', 'qux': ''}
+    as_dict = model.as_dict()
+    assert as_dict == {'foo': 'foo', 'bar': 'bar', 'baz': '', 'qux': ''}
 
 
 def test_model_get_fields():

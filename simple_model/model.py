@@ -55,7 +55,7 @@ class Model:
 
         return None if raise_exception else True
 
-    def serialize(self, exclude_fields: Iterable=None) -> Dict[str, Any]:
+    def as_dict(self, exclude_fields: Iterable=None) -> Dict[str, Any]:
         self.validate()
         self.clean()
 
@@ -64,6 +64,6 @@ class Model:
             if exclude_fields and field.name in exclude_fields:
                 continue
 
-            data[field.name] = field.serialize()
+            data[field.name] = field.to_python()
 
         return data

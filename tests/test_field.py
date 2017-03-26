@@ -32,32 +32,32 @@ def test_model_field_set_value_to_its_own_model(model_field):
         model_field.value = model_field._model
 
 
-def test_model_field_serialize_simple(model_field):
+def test_model_field_to_python_simple(model_field):
     model_field.value = 1
-    assert model_field.serialize() == 1
+    assert model_field.to_python() == 1
 
 
-def test_model_field_serialize_nested(model2, model_field):
+def test_model_field_to_python_nested(model2, model_field):
     model_field.value = model2
-    assert model_field.serialize() == model2.serialize()
+    assert model_field.to_python() == model2.as_dict()
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))
-def test_model_field_serialize_nested_iterable(iterable, model_field, model, model2):
+def test_model_field_to_python_nested_iterable(iterable, model_field, model, model2):
     model_field.value = iterable([model, model2])
-    assert model_field.serialize() == [model.serialize(), model2.serialize()]
+    assert model_field.to_python() == [model.as_dict(), model2.as_dict()]
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))
-def test_model_field_serialize_iterable_empty(iterable, model_field, model, model2):
+def test_model_field_to_python_iterable_empty(iterable, model_field, model, model2):
     model_field.value = iterable([])
-    assert model_field.serialize() == []
+    assert model_field.to_python() == []
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))
-def test_model_field_serialize_iterable(iterable, model_field, model, model2):
+def test_model_field_to_python_iterable(iterable, model_field, model, model2):
     model_field.value = iterable([1, 2, 3])
-    assert model_field.serialize() == [1, 2, 3]
+    assert model_field.to_python() == [1, 2, 3]
 
 
 def test_model_field_validate(model_field):

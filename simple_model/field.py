@@ -60,18 +60,18 @@ class ModelField:
 
         self._validate(self.value)
 
-    def serialize(self):
+    def to_python(self):
         try:
-            return self.value.serialize()
+            return self.value.as_dict()
         except AttributeError:
-            serialized = None
+            python_value = None
 
         if isinstance(self.value, (List, tuple)):
-            serialized = []
+            python_value = []
             for value in self.value:
                 try:
-                    serialized.append(value.serialize())
+                    python_value.append(value.as_dict())
                 except AttributeError:
-                    serialized.append(value)
+                    python_value.append(value)
 
-        return self.value if serialized is None else serialized
+        return self.value if python_value is None else python_value
