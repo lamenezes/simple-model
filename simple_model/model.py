@@ -21,20 +21,20 @@ class Model:
     def __repr__(self) -> str:
         return '{}(fields={!r})'.format(type(self).__name__, list(self._get_fields()))
 
-    def _get_fields(self):
+    def _get_fields(self) -> Iterator[ModelField]:
         allow_empty_fields = self.get_allow_empty()
         for field_name in self.get_fields():
             allow_empty = '__all__' in allow_empty_fields or field_name in allow_empty_fields
             field_value = getattr(self, field_name)
             yield self._field_class(self, field_name, field_value, allow_empty)
 
-    def get_fields(self):
+    def get_fields(self) -> Tuple[str]:
         assert self.fields, ('{} should include a fields attribute or override '
                              'the get_fields method'.format(type(self).__name__))
 
         return self.fields
 
-    def get_allow_empty(self):
+    def get_allow_empty(self) -> Tuple:
         return self.allow_empty
 
     def is_empty(self, value: Any) -> bool:
