@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterator, Iterable, Tuple, Union
+from typing import Any, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
 from .field import ModelField
@@ -15,7 +15,8 @@ class Model:
             setattr(self, field_name, field_value)
 
     def __iter__(self) -> Iterator[Tuple[str, Any]]:
-        return ((field.name, field.value) for field in self._get_fields())
+        for field in self._get_fields():
+            yield field.name, field.to_python()
 
     def __repr__(self) -> str:
         return '{}(fields={!r})'.format(type(self).__name__, list(self._get_fields()))
@@ -54,16 +55,3 @@ class Model:
                 return False
 
         return None if raise_exception else True
-
-    def as_dict(self, exclude_fields: Iterable=None) -> Dict[str, Any]:
-        self.validate()
-        self.clean()
-
-        data = {}
-        for field in self._get_fields():
-            if exclude_fields and field.name in exclude_fields:
-                continue
-
-            data[field.name] = field.to_python()
-
-        return data

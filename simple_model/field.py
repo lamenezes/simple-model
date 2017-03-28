@@ -61,17 +61,19 @@ class ModelField:
         self._validate(self.value)
 
     def to_python(self):
-        try:
-            return self.value.as_dict()
-        except AttributeError:
-            python_value = None
-
         if isinstance(self.value, (List, tuple)):
             python_value = []
             for value in self.value:
                 try:
-                    python_value.append(value.as_dict())
-                except AttributeError:
+                    python_value.append(dict(value))
+                except TypeError:
                     python_value.append(value)
+            return python_value
 
-        return self.value if python_value is None else python_value
+        if not self.value:
+            return self.value
+
+        try:
+            return dict(self.value)
+        except (TypeError, ValueError):
+            return self.value

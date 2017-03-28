@@ -39,13 +39,13 @@ def test_model_field_to_python_simple(model_field):
 
 def test_model_field_to_python_nested(model2, model_field):
     model_field.value = model2
-    assert model_field.to_python() == model2.as_dict()
+    assert model_field.to_python() == dict(model2)
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))
 def test_model_field_to_python_nested_iterable(iterable, model_field, model, model2):
     model_field.value = iterable([model, model2])
-    assert model_field.to_python() == [model.as_dict(), model2.as_dict()]
+    assert model_field.to_python() == [dict(model), dict(model2)]
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))
