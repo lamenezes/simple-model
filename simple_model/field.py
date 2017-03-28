@@ -50,6 +50,7 @@ class ModelField:
             return self.value
 
         self.value = self._clean(self.value)
+        self.validate()
 
     def validate(self):
         if not self.allow_empty and not self._model.is_empty(self.value):
