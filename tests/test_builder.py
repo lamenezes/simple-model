@@ -23,9 +23,21 @@ def test_model_builder():
         'foo': 'foo',
         'bar': 'bar',
     }
-    birl = model_builder('Birl', data, recurse=False)
+    birl = model_builder(data, recurse=False)
     assert birl.foo == 'foo'
     assert birl.bar == 'bar'
+    assert type(birl).__name__ == 'MyModel'
+
+
+def test_model_builder_class_name():
+    data = {
+        'foo': 'foo',
+        'bar': 'bar',
+    }
+    birl = model_builder(data, class_name='Birl', recurse=False)
+    assert birl.foo == 'foo'
+    assert birl.bar == 'bar'
+    assert type(birl).__name__ == 'Birl'
 
 
 def test_model_builder_recurse_false():
@@ -35,7 +47,7 @@ def test_model_builder_recurse_false():
         'bar': 'bar',
         'my_model': my_model,
     }
-    birl = model_builder('Birl', data, recurse=False)
+    birl = model_builder(data, recurse=False)
     assert birl.foo == 'foo'
     assert birl.bar == 'bar'
     assert birl.my_model == my_model
@@ -48,7 +60,7 @@ def test_model_builder_recurse():
         'bar': 'bar',
         'my_model': my_model,
     }
-    birl = model_builder('Birl', data)
+    birl = model_builder(data)
     assert birl.foo == 'foo'
     assert birl.bar == 'bar'
     assert birl.my_model.baz == 'baz'
@@ -66,7 +78,7 @@ def test_model_builder_recurse_iterable(iterable_class):
         'bar': 'bar',
         'my_model': my_model,
     }
-    birl = model_builder('Birl', data)
+    birl = model_builder(data)
     assert birl.foo == 'foo'
     assert birl.bar == 'bar'
     assert birl.my_model[0].baz == 'baz'
