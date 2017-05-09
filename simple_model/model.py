@@ -15,6 +15,8 @@ class Model:
             setattr(self, field_name, field_value)
 
     def __iter__(self) -> Iterator[Tuple[str, Any]]:
+        self.clean()
+
         for field in self._get_fields():
             yield field.name, field.to_python()
 
