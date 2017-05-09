@@ -57,7 +57,7 @@ How to use
     >> person.name
     'John Doe'
     >> person.validate()
-    >> person.as_dict()
+    >> dict(person)
     {'name': 'John Doe', 'age': 18, 'height': '', 'weight': ''}
 
 
@@ -102,7 +102,7 @@ easily done using simple-model:
 
         def clean_name(self, value):
             return value.strip()
-            
+
         def clean_age(self, value):
             return int(value)
 
@@ -122,20 +122,11 @@ To convert to dict is pretty straight-forward task:
 .. code:: python
 
     >> person = Person(name='Jane Doe', age=60)
-    >> person.as_dict()
+    >> dict(person)
     {'age': 60, 'height': None, 'name': 'Jane Doe', 'weight': None}
 
-You may also hide some fields from the returned dict by passing a list to the
-`as_dict` method:
 
-
-.. code:: python
-
-    >> person.as_dict(exclude_fields=('weight', 'age'))
-    {'height': None, 'name': 'Jane Doe'}
-
-Simple model also supports nested models:
-
+Simple model also supports dict conversion of nested models:
 
 .. code:: python
 
@@ -144,7 +135,7 @@ Simple model also supports nested models:
 
     >> person = Person(name='Jane Doe', age=60)
     >> other_person = SocialPerson(name='John Doe', friend=person)
-    >> other_person.as_dict()
+    >> dict(other_person)
     {'friend': {'age': 60, 'height': None, 'name': 'Jane Doe', 'weight': None}, 'name': 'John Doe'}
 
 
