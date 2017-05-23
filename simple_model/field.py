@@ -46,11 +46,11 @@ class ModelField:
         self._set_model_value(value)
 
     def clean(self):
-        if not self._clean:
-            return self.value
+        if self._clean:
+            self.value = self._clean(self.value)
 
-        self.value = self._clean(self.value)
         self.validate()
+        return self.value
 
     def validate(self):
         if not self.allow_empty and not self._model.is_empty(self.value):

@@ -93,6 +93,15 @@ def test_model_field_clean(model_field):
     assert model_field.value == 'foo'
 
 
+def test_model_field_clean_invalid(model_field):
+    model_field._clean = lambda s: s.strip()
+    model_field._validate = model_field._model.validate_foo
+    model_field.value = ' fo '
+
+    with pytest.raises(ValidationError):
+        model_field.clean()
+
+
 def test_model_field_clean_without_clean_method(model_field):
     model_field._clean = None
     model_field.value = ' foo '
@@ -100,3 +109,12 @@ def test_model_field_clean_without_clean_method(model_field):
     model_field.clean()
 
     assert model_field.value == ' foo '
+
+
+def test_model_field_clean_without_clean_method_invalid(model_field):
+    model_field._clean = None
+    model_field._validate = model_field._model.validate_foo
+    model_field.value = ' fo '
+
+    with pytest.raises(ValidationError):
+        model_field.clean()
