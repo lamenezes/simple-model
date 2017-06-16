@@ -1,7 +1,11 @@
 from typing import Any, Dict, List
 
 from .model import Model
-from .utils import camel_case, coerce_to_alpha
+from .utils import camel_case, coerce_to_alpha, snake_case
+
+
+def _clean_model_key(key: str) -> str:
+    return snake_case(coerce_to_alpha(key))
 
 
 def model_class_builder(class_name: str, data: Any) -> type:
@@ -15,7 +19,7 @@ def model_class_builder(class_name: str, data: Any) -> type:
 
 
 def model_builder(data: Any, class_name: str='MyModel', recurse: bool=True) -> Model:
-    data = {coerce_to_alpha(key): value for key, value in data.items()}
+    data = {_clean_model_key(key): value for key, value in data.items()}
     parent_class = model_class_builder(class_name, data)
     instance = parent_class(**data)
 
