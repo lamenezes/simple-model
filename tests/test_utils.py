@@ -9,3 +9,4 @@ def test_utils_camel_case():
     assert camel_case('fooBarBaz') == 'FooBarBaz'
     assert camel_case('foo bar baz') == 'FooBarBaz'
     assert camel_case('foo Bar-baz') == 'FooBarBaz'
+    assert camel_case('') == ''
