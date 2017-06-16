@@ -95,3 +95,13 @@ def test_model_builder_recurse_iterable(iterable_class):
 
     assert isinstance(birl.my_model[0], Model)
     assert type(birl.my_model[0]).__name__ == 'NamelessModel'
+
+
+def test_model_builder_data_keys_with_special_characters():
+    data = {
+        'foo*bar': 'foobar',
+        'baz/qux': 'bazqux',
+    }
+    birl = model_builder(data)
+    assert birl.foo_bar == 'foobar'
+    assert birl.baz_qux == 'bazqux'

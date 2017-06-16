@@ -5,16 +5,17 @@ from .utils import camel_case, coerce_to_alpha
 
 
 def model_class_builder(class_name: str, data: Any) -> type:
-    keys = (coerce_to_alpha(key) for key in data.keys())
+    keys = data.keys() or ('',)
     attrs = {
         'allow_empty': '__all__',
-        'fields': tuple(keys) if data else ('',),
+        'fields': tuple(keys),
     }
     new_class = type(class_name, (Model,), attrs)
     return new_class
 
 
 def model_builder(data: Any, class_name: str='MyModel', recurse: bool=True) -> Model:
+    data = {coerce_to_alpha(key): value for key, value in data.items()}
     parent_class = model_class_builder(class_name, data)
     instance = parent_class(**data)
 
