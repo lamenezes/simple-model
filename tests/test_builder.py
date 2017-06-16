@@ -8,7 +8,7 @@ def test_model_class_builder():
     Birl = model_class_builder('Birl', {'f': 'foo', 'b': 'bar'})
     birl = Birl()
 
-    assert issubclass(Birl, Model)
+    assert isinstance(birl, Model)
     keys = ('f', 'b')
     assert len(Birl.fields) == len(keys)
     assert set(Birl.fields) == set(keys)
@@ -16,6 +16,13 @@ def test_model_class_builder():
     assert birl.clean() is None
     assert birl.validate(raise_exception=False) is True
     assert dict(birl) == {'f': None, 'b': None}
+
+
+def test_model_class_builder_empty_data():
+    Birl = model_class_builder('Birl', {})
+    birl = Birl()
+
+    assert isinstance(birl, Model)
 
 
 def test_model_builder():

@@ -1,13 +1,14 @@
 from typing import Any, Dict, List
 
 from .model import Model
-from .utils import camel_case
+from .utils import camel_case, coerce_to_alpha
 
 
 def model_class_builder(class_name: str, data: Any) -> type:
+    keys = (coerce_to_alpha(key) for key in data.keys())
     attrs = {
         'allow_empty': '__all__',
-        'fields': tuple(data.keys()),
+        'fields': tuple(keys) if data else ('',),
     }
     new_class = type(class_name, (Model,), attrs)
     return new_class
