@@ -21,7 +21,8 @@ class Model:
             yield field.name, field.to_python()
 
     def __repr__(self) -> str:
-        return '{}(fields={!r})'.format(type(self).__name__, list(self._get_fields()))
+        attrs = ', '.join('{field.name}={field.value!r}'.format(field=field) for field in self._get_fields())
+        return '{class_name}({attrs})'.format(class_name=type(self).__name__, attrs=attrs)
 
     def _get_fields(self) -> Iterator[ModelField]:
         allow_empty_fields = self.get_allow_empty()

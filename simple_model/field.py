@@ -21,7 +21,10 @@ class ModelField:
             self._clean = None
 
     def __repr__(self):
-        return '{}({}={!r})'.format(type(self).__name__, self.name, self.value)
+        return '{class_name}({field.name}={field.value!r})'.format(
+            class_name=type(self).__name__,
+            field=self,
+        )
 
     def __str__(self):
         return str(self.value)
