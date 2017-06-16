@@ -1,4 +1,4 @@
-from simple_model.utils import camel_case, capitalize_first, coerce_to_alpha
+from simple_model.utils import camel_case, capitalize_first, coerce_to_alpha, snake_case
 
 
 def test_utils_capitalize_first():
@@ -21,3 +21,10 @@ def test_utils_camel_case():
 def test_coerce_to_alpha():
     assert coerce_to_alpha('') == ''
     assert coerce_to_alpha('foo-bar.baz') == 'foo_bar_baz'
+
+
+def test_snake_case():
+    assert snake_case('') == ''
+    assert snake_case('foo') == 'foo'
+    assert snake_case('FooBarBazQux') == 'foo_bar_baz_qux'
+    assert snake_case('FooBarBaz___') == 'foo_bar_baz___'

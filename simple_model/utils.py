@@ -16,3 +16,8 @@ def camel_case(string: str) -> str:
 
 def coerce_to_alpha(string: str) -> str:
     return re.sub(r'\W', '_', string)
+
+
+def snake_case(string: str) -> str:
+    aux = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', string)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', aux).lower()
