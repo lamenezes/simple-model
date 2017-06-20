@@ -52,6 +52,11 @@ class ModelField:
         if self._clean:
             self.value = self._clean(self.value)
 
+        try:
+            self.value.clean()
+        except AttributeError:
+            pass
+
         self.validate()
         return self.value
 

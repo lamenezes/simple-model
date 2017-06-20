@@ -118,3 +118,14 @@ def test_model_field_clean_without_clean_method_invalid(model_field):
 
     with pytest.raises(ValidationError):
         model_field.clean()
+
+
+def test_model_field_clean_nested(model_field):
+    model_field._clean = lambda s: s.strip()
+    model_field.value = ' foo '
+
+    model = MyModel(foo='foo', bar='bar', baz=model_field)
+
+    model.clean()
+
+    assert model_field.value == 'foo'

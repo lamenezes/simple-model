@@ -147,3 +147,17 @@ def test_model_get_allow_empty():
 
     model = MyGetFieldsModel(foo='foo')
     assert model.validate(raise_exception=False)
+
+
+def test_model_field_clean_nested(model_field):
+    grandma = MyModel(foo='foo', bar='bar', qux=' qux ')
+    mother = MyModel(foo='foo', bar='bar', baz=grandma, qux=' qux ')
+    child = MyModel(foo='foo', bar='bar', baz=mother, qux=' qux ')
+
+    grandma.clean_qux = mother.clean_qux = child.clean_qux = lambda s: s.strip()
+
+    child.clean()
+
+    assert grandma.qux == 'qux'
+    assert mother.qux == 'qux'
+    assert child.qux == 'qux'
