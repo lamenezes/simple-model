@@ -1,13 +1,7 @@
 import pytest
 
-from simple_model.builder import _clean_model_key, model_builder, model_class_builder
+from simple_model.builder import model_builder, model_class_builder
 from simple_model.model import Model
-
-
-def test_clean_model_key():
-    assert _clean_model_key('') == ''
-    assert _clean_model_key('foobar') == 'foobar'
-    assert _clean_model_key('FooBarBaz.qux') == 'foo_bar_baz_qux'
 
 
 def test_model_class_builder():

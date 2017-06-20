@@ -4,10 +4,6 @@ from .model import Model
 from .utils import camel_case, coerce_to_alpha, snake_case
 
 
-def _clean_model_key(key: str) -> str:
-    return snake_case(coerce_to_alpha(key))
-
-
 def model_class_builder(class_name: str, data: Any) -> type:
     keys = data.keys() or ('',)
     attrs = {
@@ -18,10 +14,21 @@ def model_class_builder(class_name: str, data: Any) -> type:
     return new_class
 
 
-def model_builder(data: Any, class_name: str='MyModel', recurse: bool=True) -> Model:
-    data = {_clean_model_key(key): value for key, value in data.items()}
-    parent_class = model_class_builder(class_name, data)
-    instance = parent_class(**data)
+def model_builder(
+    data: Any, class_name: str='MyModel', recurse: bool=True,
+    snake_case_keys: bool=True, alpha_keys: bool=True,
+) -> Model:
+
+    clean_funcs = []
+    if snake_case_keys:
+        clean_funcs.append(snake_case)
+
+    if alpha_keys:
+        clean_funcs.append(coerce_to_alpha)
+
+    data = {func(key): value for key, value in data.items() for func in clean_funcs}
+    cls = model_class_builder(class_name, data)
+    instance = cls(**data)
 
     if not recurse:
         return instance
