@@ -6,6 +6,15 @@ from simple_model import Model
 from .conftest import MyModel, MyEmptyModel
 
 
+@pytest.fixture
+def nested_model():
+    grandma = MyModel(foo='foo', bar='bar', qux=' qux ')
+    mother = MyModel(foo='foo', bar='bar', baz=grandma, qux=' qux ')
+    child = MyModel(foo='foo', bar='bar', baz=mother, qux=' qux ')
+    grandma.clean_qux = mother.clean_qux = child.clean_qux = lambda s: s.strip()
+    return child
+
+
 def test_model_fields(model):
     assert model.foo == 'foo'
     assert model.bar == 'bar'
@@ -72,6 +81,15 @@ def test_model_fields_field_validation_error_without_raise(model):
     assert model.validate(raise_exception=False) is False
 
 
+def test_model_validate_nested(nested_model):
+    nested_model.baz.foo = ''
+    assert nested_model.validate(raise_exception=False) is False
+
+    nested_model.baz.foo = 'foo'
+    nested_model.baz.baz.foo = ''
+    assert nested_model.validate(raise_exception=False) is False
+
+
 def test_model_iter_simple(model):
     as_dict_model = {
         'foo': 'foo',
@@ -116,6 +134,14 @@ def test_model_clean(model):
         assert getattr(model, field_name) == field_name
 
 
+def test_model_clean_nested(nested_model):
+    nested_model.clean()
+
+    assert nested_model.qux == 'qux'
+    assert nested_model.baz.qux == 'qux'
+    assert nested_model.baz.baz.qux == 'qux'
+
+
 def test_model_iter_clean(model):
     model.bar = ' bar '
     model.clean_bar = lambda f: f.strip()
@@ -147,17 +173,3 @@ def test_model_get_allow_empty():
 
     model = MyGetFieldsModel(foo='foo')
     assert model.validate(raise_exception=False)
-
-
-def test_model_field_clean_nested(model_field):
-    grandma = MyModel(foo='foo', bar='bar', qux=' qux ')
-    mother = MyModel(foo='foo', bar='bar', baz=grandma, qux=' qux ')
-    child = MyModel(foo='foo', bar='bar', baz=mother, qux=' qux ')
-
-    grandma.clean_qux = mother.clean_qux = child.clean_qux = lambda s: s.strip()
-
-    child.clean()
-
-    assert grandma.qux == 'qux'
-    assert mother.qux == 'qux'
-    assert child.qux == 'qux'

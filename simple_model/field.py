@@ -64,10 +64,13 @@ class ModelField:
         if not self.allow_empty and not self._model.is_empty(self.value):
             raise EmptyField(self.name)
 
-        if not self._validate:
-            return
+        if self._validate:
+            return self._validate(self.value)
 
-        self._validate(self.value)
+        try:
+            self.value.validate()
+        except AttributeError:
+            return
 
     def to_python(self):
         if isinstance(self.value, (List, tuple)):
