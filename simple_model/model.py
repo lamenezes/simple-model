@@ -43,7 +43,9 @@ class Model:
         return self.allow_empty
 
     def is_empty(self, value: Any) -> bool:
-        return bool(value)
+        if value == 0 or value is False:
+            return False
+        return not bool(value)
 
     def clean(self) -> None:
         for field in self._get_fields():

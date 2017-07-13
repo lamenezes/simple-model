@@ -61,7 +61,7 @@ class ModelField:
         return self.value
 
     def validate(self):
-        if not self.allow_empty and not self._model.is_empty(self.value):
+        if not self.allow_empty and self._model.is_empty(self.value):
             raise EmptyField(self.name)
 
         if self._validate:

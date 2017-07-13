@@ -76,7 +76,7 @@ def test_model_field_validate_validation_error(model_field, exception):
         model_field.validate()
 
 
-@pytest.mark.parametrize('blank_value', (None, '', 0, [], {}, ()))
+@pytest.mark.parametrize('blank_value', (None, '', [], {}, ()))
 def test_model_field_validate_empty_field(model_field, blank_value):
     model_field.allow_empty = False
     model_field.value = blank_value

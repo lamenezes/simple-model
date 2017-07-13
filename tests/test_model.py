@@ -44,7 +44,7 @@ def test_model_fields_allow_empty__all__():
     assert model.qux is None
 
 
-@pytest.mark.parametrize('empty_value', (None, '', 0))
+@pytest.mark.parametrize('empty_value', (None, ''))
 def test_model_fields_validate_allow_empty_error(empty_value):
     with pytest.raises(EmptyField):
         MyModel().validate()
@@ -59,6 +59,12 @@ def test_model_fields_validate_allow_empty_error(empty_value):
         MyModel(foo=empty_value, bar=empty_value).validate()
 
     assert 'cannot be empty' in str(exc)
+
+
+@pytest.mark.parametrize('value_exception', (False, 0))
+def test_model_fields_validate_is_empty_exception(model, value_exception):
+    model.bar = value_exception
+    assert model.validate(raise_exception=False) is True
 
 
 def test_model_fields_field_validation(model):
