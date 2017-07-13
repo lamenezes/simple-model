@@ -44,7 +44,7 @@ def test_model_fields_allow_empty__all__():
     assert model.qux is None
 
 
-@pytest.mark.parametrize('empty_value', (None, '', 0))
+@pytest.mark.parametrize('empty_value', (None, ''))
 def test_model_fields_validate_allow_empty_error(empty_value):
     with pytest.raises(EmptyField):
         MyModel().validate()
