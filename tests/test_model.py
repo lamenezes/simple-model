@@ -61,6 +61,12 @@ def test_model_fields_validate_allow_empty_error(empty_value):
     assert 'cannot be empty' in str(exc)
 
 
+@pytest.mark.parametrize('value_exception', (False, 0))
+def test_model_fields_validate_is_empty_exception(model, value_exception):
+    model.bar = value_exception
+    assert model.validate(raise_exception=False) is True
+
+
 def test_model_fields_field_validation(model):
     assert model.validate() is None
 
