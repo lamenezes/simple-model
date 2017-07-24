@@ -4,14 +4,11 @@ from .exceptions import ValidationError
 from .field import ModelField
 
 
-class Model:
-    fields = ()
-    allow_empty = ()
+class BaseModel:
     _field_class = ModelField
 
     def __init__(self, **kwargs):
-        for field_name in self.get_fields():
-            field_value = kwargs.get(field_name, None)
+        for field_name, field_value in kwargs.items():
             setattr(self, field_name, field_value)
 
     def __iter__(self) -> Iterator[Tuple[str, Any]]:
@@ -27,20 +24,12 @@ class Model:
         return '{class_name}({attrs})'.format(class_name=type(self).__name__, attrs=attrs)
 
     def _get_fields(self) -> Iterator[ModelField]:
-        allow_empty_fields = self.get_allow_empty()
         for field_name in self.get_fields():
-            allow_empty = '__all__' in allow_empty_fields or field_name in allow_empty_fields
             field_value = getattr(self, field_name)
-            yield self._field_class(self, field_name, field_value, allow_empty)
+            yield self._field_class(self, field_name, field_value)
 
-    def get_fields(self) -> Tuple[str]:
-        assert self.fields, ('{} should include a fields attribute or override '
-                             'the get_fields method'.format(type(self).__name__))
-
-        return self.fields
-
-    def get_allow_empty(self) -> Tuple:
-        return self.allow_empty
+    def get_fields(self):
+        raise NotImplementedError()
 
     def is_empty(self, value: Any) -> bool:
         if value == 0 or value is False:
@@ -62,3 +51,30 @@ class Model:
                 return False
 
         return None if raise_exception else True
+
+
+class Model(BaseModel):
+    fields = ()
+    allow_empty = ()
+
+    def __init__(self, **kwargs):
+        for field_name in self.get_fields():
+            field_value = kwargs.get(field_name, None)
+            setattr(self, field_name, field_value)
+
+    def _get_fields(self) -> Iterator[ModelField]:
+        fields = super()._get_fields()
+        allow_empty_fields = self.get_allow_empty()
+        for field in fields:
+            allow_empty = '__all__' in allow_empty_fields or field.name in allow_empty_fields
+            field.allow_empty = allow_empty
+            yield field
+
+    def get_fields(self) -> Tuple[str]:
+        assert self.fields, ('{} should include a fields attribute or override '
+                             'the get_fields method'.format(type(self).__name__))
+
+        return self.fields
+
+    def get_allow_empty(self) -> Tuple:
+        return self.allow_empty

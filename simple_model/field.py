@@ -4,7 +4,7 @@ from .exceptions import EmptyField
 
 
 class ModelField:
-    def __init__(self, model, name, value, allow_empty):
+    def __init__(self, model, name, value, allow_empty=True):
         self._model = model
         self._name = name
         self._value = value
