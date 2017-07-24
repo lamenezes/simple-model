@@ -1,7 +1,7 @@
 import pytest
 
 from simple_model.exceptions import EmptyField, ValidationError
-from simple_model import Model
+from simple_model import DynamicModel, Model
 from simple_model.model import BaseModel
 
 from .conftest import MyModel, MyEmptyModel
@@ -293,10 +293,20 @@ def test_model_get_fields_invalid():
     assert 'should include a fields attr' in str(exc)
 
 
-def test_model_get_allow_empty():
-    class MyGetFieldsModel(MyModel):
-        def get_allow_empty(self):
-            return super().allow_empty + ('bar',)
+def test_dynamic_model_get_fields():
+    assert DynamicModel().get_fields() == ()
 
-    model = MyGetFieldsModel(foo='foo')
-    assert model.validate(raise_exception=False)
+    model = DynamicModel(foo='le foo', bar='le bar')
+    fields = model.get_fields()
+    assert 'bar' in fields
+    assert 'foo' in fields
+
+    model.baz = 'le baz'
+    fields = model.get_fields()
+    assert 'baz' in fields
+    assert len(fields) == 3
+
+    model._private = "it's private!"
+    fields = model.get_fields()
+    assert '_private' not in fields
+    assert len(fields) == 3

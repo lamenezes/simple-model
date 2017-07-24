@@ -1,4 +1,4 @@
 from .builder import model_builder
-from .model import Model
+from .model import DynamicModel, Model
 
-__all__ = ('Model', 'model_builder')
+__all__ = ('DynamicModel', 'Model', 'model_builder')

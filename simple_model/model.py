@@ -1,3 +1,4 @@
+import inspect
 from typing import Any, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
@@ -53,6 +54,14 @@ class BaseModel:
         return None if raise_exception else True
 
 
+class DynamicModel(BaseModel):
+    def get_fields(self) -> Tuple[str, ...]:
+        return tuple(
+            name for name, value in inspect.getmembers(self)
+            if not(name.startswith('_') or inspect.ismethod(value))
+        )
+
+
 class Model(BaseModel):
     fields = ()
     allow_empty = ()
@@ -76,5 +85,5 @@ class Model(BaseModel):
 
         return self.fields
 
-    def get_allow_empty(self) -> Tuple:
+    def get_allow_empty(self) -> Tuple[str, ...]:
         return self.allow_empty
