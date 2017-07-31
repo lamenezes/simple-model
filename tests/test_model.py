@@ -106,6 +106,33 @@ def test_base_model_validate_fail(base_model):
         base_model.validate()
 
 
+def test_base_model___eq___equals(base_model):
+    other_model = BaseModel(foo='foo', bar='bar')
+    other_model.get_fields = base_model.get_fields = lambda: ('foo', 'bar')
+
+    assert base_model == base_model
+    assert base_model is base_model
+
+    assert base_model == {'foo': 'foo', 'bar': 'bar'}
+    assert base_model == (('foo', 'foo'), ('bar', 'bar'))
+    assert base_model == [('foo', 'foo'), ('bar', 'bar')]
+
+    assert base_model is not other_model
+    assert base_model == other_model
+
+
+def test_base_model___eq___not_equals(base_model):
+    other_model = BaseModel(foo='bar', bar='foo')
+    other_model.get_fields = base_model.get_fields = lambda: ('foo', 'bar')
+
+    assert base_model != other_model
+    assert base_model != {}
+    assert base_model != ()
+    assert base_model != []
+    assert base_model != 1
+    assert base_model != 'base_model'
+
+
 def test_model(model):
     assert model.foo == 'foo'
     assert model.bar == 'bar'

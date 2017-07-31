@@ -1,16 +1,22 @@
 import inspect
-from typing import Any, Iterator, Tuple, Union
+from typing import Any, Iterable, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
 from .field import ModelField
 
 
-class BaseModel:
+class BaseModel(Iterable[Tuple[str, Any]]):
     _field_class = ModelField
 
     def __init__(self, **kwargs):
         for field_name, field_value in kwargs.items():
             setattr(self, field_name, field_value)
+
+    def __eq__(self, other: Any) -> bool:
+        try:
+            return dict(self) == dict(other)
+        except (TypeError, ValueError):
+            return False
 
     def __iter__(self) -> Iterator[Tuple[str, Any]]:
         self.clean()
