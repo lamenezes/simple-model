@@ -32,9 +32,10 @@ def test_model_field_set_value_to_its_own_model(model_field):
         model_field.value = model_field._model
 
 
-def test_model_field_to_python_simple(model_field):
-    model_field.value = 1
-    assert model_field.to_python() == 1
+@pytest.mark.parametrize('value', (1, '1', [2], ['2']))
+def test_model_field_to_python_simple(model_field, value):
+    model_field.value = value
+    assert model_field.to_python() == value
 
 
 def test_model_field_to_python_nested(model2, model_field):

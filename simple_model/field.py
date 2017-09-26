@@ -77,9 +77,10 @@ class ModelField:
             python_value = []
             for value in self.value:
                 try:
-                    python_value.append(dict(value))
-                except TypeError:
-                    python_value.append(value)
+                    value = dict(value)
+                except (TypeError, ValueError):
+                    pass
+                python_value.append(value)
             return python_value
 
         if not self.value:
