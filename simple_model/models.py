@@ -2,7 +2,7 @@ import inspect
 from typing import Any, Iterable, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
-from .field import ModelField
+from .fields import ModelField
 
 
 class BaseModel(Iterable[Tuple[str, Any]]):

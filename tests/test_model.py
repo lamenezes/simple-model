@@ -2,7 +2,7 @@ import pytest
 
 from simple_model.exceptions import EmptyField, ValidationError
 from simple_model import DynamicModel, Model
-from simple_model.model import BaseModel
+from simple_model.models import BaseModel
 
 from .conftest import MyModel, MyEmptyModel
 
