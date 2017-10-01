@@ -14,9 +14,9 @@ plenty of lists and dicts.
 
 It has simple objectives:
 
-- Define your fields easily (just a tuple, not dicts or instances of type classes whatever)
+- Define your fields easily (just a tuple, nor dicts or instances of type classes whatever)
 - Support for field validation
-- Convert to dict
+- Conversion to dict
 
 That's it. If you want something more complex there are plenty of libraries and
 frameworks that does a lot of cool stuff.
@@ -149,6 +149,7 @@ It also supports nested models as lists:
     >> person = Person(name='Jane Doe', age=60)
     >> other_person = Person(name='John Doe', age=15)
     >> social_person = MoreSocialPerson(name='Foo Bar', friends=[person, other_person])
+    >> dict(social_person)
     {
         'name': 'Foo Bar',
         'friends': [
