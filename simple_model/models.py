@@ -30,6 +30,17 @@ class BaseModel(Iterable[Tuple[str, Any]]):
         )
         return '{class_name}({attrs})'.format(class_name=type(self).__name__, attrs=attrs)
 
+    @classmethod
+    def build_many(cls, source: Iterable) -> list:
+        if not source:
+            raise ValueError('source should have at least one item')
+
+        keys_sets = [set(d.keys()) for d in source]
+        if any(map(lambda x: x ^ keys_sets[0], keys_sets)):
+            raise ValueError('All elements in source should have the same keys')
+
+        return [cls(**item) for item in source]
+
     def _get_fields(self) -> Iterator[ModelField]:
         for field_name in self.get_fields():
             field_value = getattr(self, field_name)
