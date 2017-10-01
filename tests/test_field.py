@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from simple_model.exceptions import EmptyField, ValidationError
-from simple_model.model import ModelField
+from simple_model.models import ModelField
 
 from .conftest import MyModel
 

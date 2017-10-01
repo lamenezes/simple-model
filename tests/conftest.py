@@ -1,7 +1,7 @@
 import pytest
 
 from simple_model.exceptions import ValidationError
-from simple_model.model import Model
+from simple_model.models import Model
 
 
 class MyModel(Model):

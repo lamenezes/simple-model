@@ -1,7 +1,7 @@
 import pytest
 
 from simple_model.builder import model_builder, model_class_builder
-from simple_model.model import Model
+from simple_model.models import Model
 
 
 def test_model_class_builder():

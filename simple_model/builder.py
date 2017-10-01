@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from .model import Model
+from .models import Model
 from .utils import camel_case, coerce_to_alpha, snake_case
 
 
