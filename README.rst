@@ -21,6 +21,8 @@ It has simple objectives:
 That's it. If you want something more complex there are plenty of libraries and
 frameworks that does a lot of cool stuff.
 
+.. contents:: **Table of Contents**
+
 --------------
 How to install
 --------------
