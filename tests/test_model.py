@@ -23,6 +23,15 @@ def nested_model():
     return child
 
 
+@pytest.fixture
+def many_source():
+    return (
+        {'foo': '1 foo', 'bar': '1 bar', 'qux': '1 qux'},
+        {'foo': '2 foo', 'bar': '2 bar', 'qux': '2 qux'},
+        {'foo': '3 foo', 'bar': '3 bar', 'qux': '3 qux'},
+    )
+
+
 def test_base_model(base_model):
     assert base_model.foo == 'foo'
     assert base_model.bar == 'bar'
@@ -337,3 +346,22 @@ def test_dynamic_model_get_fields():
     fields = model.get_fields()
     assert '_private' not in fields
     assert len(fields) == 3
+
+
+def test_build_many(many_source):
+    models = BaseModel.build_many(many_source)
+
+    assert len(models) == 3
+    assert models[0].foo == '1 foo'
+    assert models[1].bar == '2 bar'
+    assert models[2].qux == '3 qux'
+
+
+def test_build_many_empty_iterable():
+    with pytest.raises(ValueError):
+        BaseModel.build_many([])
+
+
+def test_build_many_different_items():
+    with pytest.raises(ValueError):
+        BaseModel.build_many([{'a': 1}, {'b': 2}])

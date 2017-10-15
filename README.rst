@@ -116,6 +116,18 @@ easily done using simple-model:
     ('John Doe', 10)
 
 
+Build many models
+-----------------
+
+It's possible to build many models in a single step, it can be done by passing an iterable
+to the `build_many` method.
+
+.. code:: python
+
+    people = [{'name': 'John Doe'}, {'name': 'John Doe II'}]
+    models = Person.build_many(people)
+
+
 Conversion to Dict
 ------------------
 
