@@ -32,8 +32,8 @@ class BaseModel(Iterable[Tuple[str, Any]]):
 
     @classmethod
     def build_many(cls, source: Iterable) -> list:
-        if not source:
-            raise ValueError('source should have at least one item')
+        if cls.is_empty(source):
+            return []
 
         keys_sets = [d.keys() for d in source]
         for key_set in keys_sets:

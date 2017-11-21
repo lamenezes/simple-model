@@ -358,8 +358,7 @@ def test_build_many(many_source):
 
 
 def test_build_many_empty_iterable():
-    with pytest.raises(ValueError):
-        BaseModel.build_many([])
+    assert BaseModel.build_many([]) == []
 
 
 def test_build_many_different_items():
