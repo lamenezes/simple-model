@@ -35,9 +35,10 @@ class BaseModel(Iterable[Tuple[str, Any]]):
         if not source:
             raise ValueError('source should have at least one item')
 
-        keys_sets = [set(d.keys()) for d in source]
-        if any(map(lambda x: x ^ keys_sets[0], keys_sets)):
-            raise ValueError('All elements in source should have the same keys')
+        keys_sets = [d.keys() for d in source]
+        for key_set in keys_sets:
+            if key_set ^ keys_sets[0]:
+                raise ValueError('All elements in source should have the same keys')
 
         return [cls(**item) for item in source]
 
