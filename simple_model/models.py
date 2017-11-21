@@ -50,7 +50,8 @@ class BaseModel(Iterable[Tuple[str, Any]]):
     def get_fields(self):
         raise NotImplementedError()
 
-    def is_empty(self, value: Any) -> bool:
+    @staticmethod
+    def is_empty(value: Any) -> bool:
         if value == 0 or value is False:
             return False
         return not bool(value)
@@ -76,7 +77,7 @@ class DynamicModel(BaseModel):
     def get_fields(self) -> Tuple[str, ...]:
         return tuple(
             name for name, value in inspect.getmembers(self)
-            if not(name.startswith('_') or inspect.ismethod(value))
+            if not(name.startswith('_') or inspect.ismethod(value) or inspect.isfunction(value))
         )
 
 
