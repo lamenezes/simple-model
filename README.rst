@@ -42,8 +42,9 @@ How to use
 
 
     class Person(Model):
-        fields = ('name', 'age', 'height', 'weight')
-        allow_empty = ('height', 'weight')
+        class Meta:
+            fields = ('name', 'age', 'height', 'weight')
+            allow_empty = ('height', 'weight')
 
         def validate_age(self, value):
             if 0 > value > 150:
@@ -100,7 +101,8 @@ easily done using simple-model:
 .. code:: python
 
     class CleanPerson(Model):
-        fields = ('name', 'age')
+        class Meta:
+            fields = ('name', 'age')
 
         def clean_name(self, value):
             return value.strip()
@@ -145,7 +147,8 @@ Simple model also supports dict conversion of nested models:
 .. code:: python
 
     class SocialPerson(Model):
-        fields = ('name', 'friend')
+        class Meta:
+            fields = ('name', 'friend')
 
     >> person = Person(name='Jane Doe', age=60)
     >> other_person = SocialPerson(name='John Doe', friend=person)
@@ -158,7 +161,8 @@ It also supports nested models as lists:
 .. code:: python
 
     class MoreSocialPerson(Model):
-        fields = ('name', 'friends')
+        class Meta:
+            fields = ('name', 'friends')
 
     >> person = Person(name='Jane Doe', age=60)
     >> other_person = Person(name='John Doe', age=15)
