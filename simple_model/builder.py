@@ -10,7 +10,8 @@ def model_class_builder(class_name: str, data: Any) -> type:
         'allow_empty': '__all__',
         'fields': tuple(keys),
     }
-    new_class = type(class_name, (Model,), attrs)
+    Meta = type('Meta', (), attrs)
+    new_class = type(class_name, (Model,), {'Meta': Meta})
     return new_class
 
 

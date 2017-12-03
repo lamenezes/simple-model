@@ -5,8 +5,9 @@ from simple_model.models import Model
 
 
 class MyModel(Model):
-    fields = ('foo', 'bar', 'baz', 'qux')
-    allow_empty = ('baz', 'qux')
+    class Meta:
+        fields = ('foo', 'bar', 'baz', 'qux')
+        allow_empty = ('baz', 'qux')
 
     def validate_foo(self, value):
         if len(value) != 3:
@@ -14,8 +15,9 @@ class MyModel(Model):
 
 
 class MyEmptyModel(Model):
-    fields = MyModel.fields
-    allow_empty = '__all__'
+    class Meta:
+        fields = MyModel.Meta.fields
+        allow_empty = '__all__'
 
 
 @pytest.fixture
