@@ -39,7 +39,7 @@ class Model(metaclass=BaseModel):
 
     def __eq__(self, other: Any) -> bool:
         try:
-            return dict(self) == dict(other)
+            return dict(self) == dict(other)  # type: ignore
         except (TypeError, ValueError):
             return False
 
@@ -64,14 +64,14 @@ class Model(metaclass=BaseModel):
             field.allow_empty = allow_empty
             yield field
 
-    def get_fields(self) -> Tuple[str]:
-        assert self._meta.fields, ('{} should include a fields attribute or override '
+    def get_fields(self) -> Tuple[str, ...]:
+        assert self._meta.fields, ('{} should include a fields attribute or override '  # type: ignore
                                    'the get_fields method'.format(type(self).__name__))
 
-        return self._meta.fields
+        return self._meta.fields  # type: ignore
 
     def get_allow_empty(self) -> Tuple[str, ...]:
-        return self._meta.allow_empty
+        return self._meta.allow_empty  # type: ignore
 
     @classmethod
     def build_many(cls, source: Iterable) -> list:
@@ -116,7 +116,7 @@ class DynamicModel(Model):
     def _get_fields(self) -> Iterator[ModelField]:
         for field_name in self.get_fields():
             field_value = getattr(self, field_name)
-            yield self._field_class(self, field_name, field_value)
+            yield ModelField(self, field_name, field_value)
 
     def get_fields(self) -> Tuple[str, ...]:
         return tuple(
