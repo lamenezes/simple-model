@@ -1,4 +1,5 @@
 import pytest
+import typing
 
 from simple_model.exceptions import EmptyField, ValidationError
 from simple_model import DynamicModel, Model
@@ -13,6 +14,28 @@ class MyFooBarModel(Model):
 
     def clean_foo(self, foo):
         return foo.strip()
+
+
+class TypedModel(Model):
+    boolean = False  # default
+    number: float  # type constraint
+    string: str = ''  # type constraint + default
+    model: MyFooBarModel
+    models = typing.List[MyFooBarModel]
+
+    class Meta:
+        fields = (
+            'any',  # common field (no default and no type constraint)
+            'empty',
+            'boolean',
+            'number',
+            'string',
+            'model',
+            'models',
+        )
+        allow_empty = (
+            'empty',
+        )
 
 
 @pytest.fixture
