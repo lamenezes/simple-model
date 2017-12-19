@@ -20,3 +20,13 @@ build: clean
 test:
 	py.test
 	mypy simple_model
+
+release-patch: build test
+	bumpversion patch
+	git push origin master --tags
+	twine upload dist/*
+
+release-minor: build test
+	bumpversion minor
+	git push origin master --tags
+	twine upload dist/*
