@@ -16,7 +16,7 @@ def model_class_builder(class_name: str, data: Any) -> type:
 
 
 def model_builder(
-    data: Any, class_name: str='MyModel', recurse: bool=True,
+    data: Any, class_name: str='MyModel', cls: type=None, recurse: bool=True,
     snake_case_keys: bool=True, alpha_keys: bool=True,
 ) -> Model:
 
@@ -28,7 +28,8 @@ def model_builder(
         clean_funcs.append(coerce_to_alpha)
 
     data = {func(key): value for key, value in data.items() for func in clean_funcs}
-    cls = model_class_builder(class_name, data)
+    if not cls:
+        cls = model_class_builder(class_name, data)
     instance = cls(**data)
 
     if not recurse:
@@ -49,3 +50,25 @@ def model_builder(
             field.value = field_class(field.value)
 
     return instance
+
+
+def model_many_builder(
+    data: list, class_name: str='MyModel', cls: type=None, recurse: bool=True,
+    snake_case_keys: bool=True, alpha_keys: bool=True,
+) -> List[Model]:
+
+    first = data[0]
+    cls = model_class_builder(class_name, first)
+    models = []
+    for element in data:
+        model = model_builder(
+            data=element,
+            class_name=class_name,
+            cls=cls,
+            recurse=recurse,
+            snake_case_keys=snake_case_keys,
+            alpha_keys=alpha_keys,
+        )
+        models.append(model)
+
+    return models
