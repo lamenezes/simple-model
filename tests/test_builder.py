@@ -1,6 +1,6 @@
 import pytest
 
-from simple_model.builder import model_builder, model_class_builder
+from simple_model.builder import model_builder, model_class_builder, model_many_builder
 from simple_model.models import Model
 
 
@@ -105,3 +105,31 @@ def test_model_builder_data_keys_with_special_characters():
     birl = model_builder(data)
     assert birl.foo_bar == 'foobar'
     assert birl.baz_qux == 'bazqux'
+
+
+def test_model_builder_custom_class():
+    data = {
+        'foo*bar': 'foobar',
+        'baz/qux': 'bazqux',
+    }
+    cls = model_class_builder('Model', data)
+
+    birl = model_builder(data, cls=cls)
+
+    assert isinstance(birl, cls)
+
+
+def test_model_many_builder():
+    element = {
+        'foo*bar': 'foobar',
+        'baz/qux': 'bazqux',
+    }
+    model_count = 3
+    data = [element] * model_count
+
+    models = model_many_builder(data)
+
+    assert len(models) == model_count
+    first = models[0]
+    for model in models[1:]:
+        assert isinstance(model, type(first))
