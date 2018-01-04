@@ -39,17 +39,19 @@ How to install
 
     pip install pysimplemodel
 
------------
-1.0 Roadmap
------------
+----------------------------
+Roadmap for simple model 1.0
+----------------------------
 
-Support:
-1. field definition inside Meta class and not the inside the model
+Feature:
+
+1. model customization inside Meta class and not the inside the model
    (as currently it is)
 2. typing + default values via type hints
 3. simplified changelog
-4. model inheritance
-5. (maybe) proper docs
+4. model inheritance (probably on 1.1)
+5. improve docs using sphinx + read the docs (maybe)
+
 
 ----------
 How to use
