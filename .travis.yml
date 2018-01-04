@@ -1,19 +1,22 @@
 language: python
 
 python:
+  - "3.3"
+  - "3.4"
   - "3.5"
   - "3.6"
 
 install:
-    - pip install -r requirements-test.txt
-    - pip install coveralls
+    - pip install pipenv
+    - pipenv install --dev
+    - pipenv install coveralls
 
 before_script:
-    - flake8 --ignore=E501 simple_model
+    - pipenv run flake8 --ignore=E501 simple_model
 
 script:
-    - py.test
-    - mypy simple_model
+    - pipenv run py.test
+    - pipenv run mypy simple_model
 
 after_script:
-    - coveralls
+    - pipenv run coveralls
