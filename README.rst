@@ -17,6 +17,7 @@ Simple Model
 .. image:: https://coveralls.io/repos/github/lamenezes/simple-model/badge.svg?branch=master
     :target: https://coveralls.io/github/lamenezes/simple-model?branch=master
 
+
 *SimpleModel* offers a simple way to handle data using classes instead of a
 plenty of lists and dicts.
 

@@ -1,3 +1,5 @@
+.PHONY: docs
+
 clean: clean-eggs clean-build
 	@find . -iname '*.pyc' -delete
 	@find . -iname '*.pyo' -delete
@@ -16,6 +18,9 @@ clean-build:
 
 build: clean
 	python setup.py sdist
+
+docs:
+	cd docs && make html
 
 test:
 	py.test
