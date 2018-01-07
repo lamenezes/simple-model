@@ -4,16 +4,16 @@ Simple Model
 
 .. image:: https://badge.fury.io/py/pysimplemodel.svg
     :target: https://github.com/lamenezes/simple-model
-    
+
 .. image:: https://img.shields.io/badge/python-3.5%2C%203.6-blue.svg
     :target: https://github.com/lamenezes/simple-model
-    
+
 .. image:: https://img.shields.io/github/license/lamenezes/simple-model.svg
-    :target: https://github.com/lamenezes/simple-model/blob/master/LICENSE    
-    
+    :target: https://github.com/lamenezes/simple-model/blob/master/LICENSE
+
 .. image:: https://travis-ci.org/lamenezes/simple-model.svg?branch=master
     :target: https://travis-ci.org/lamenezes/simple-model
-    
+
 .. image:: https://coveralls.io/repos/github/lamenezes/simple-model/badge.svg?branch=master
     :target: https://coveralls.io/github/lamenezes/simple-model?branch=master
 
@@ -46,9 +46,8 @@ Roadmap for simple model 1.0
 
 Feature:
 
-1. model customization inside Meta class and not the inside the model
-   (as currently it is)
-2. typing + default values via type hints
+1. (done) model customization inside Meta class and not the inside the model
+2. (done) typing + default values via type hints
 3. simplified changelog
 4. model inheritance (probably on 1.1)
 5. improve docs using sphinx + read the docs (maybe)
