@@ -1,4 +1,3 @@
-import inspect
 from typing import Any, Iterable, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
@@ -106,34 +105,17 @@ class Model(metaclass=BaseModel):
         return not bool(value)
 
     def clean(self) -> None:
-        for field in self._get_fields():
-            field.clean()
-            setattr(self, field.name, field.value)
+        for name, value, descriptor in self._get_fields():
+            clean_value = descriptor.clean(self, value)
+            setattr(self, name, clean_value)
 
     def validate(self, raise_exception: bool=True) -> Union[None, bool]:
-        for field in self._get_fields():
+        for name, value, descriptor in self._get_fields():
             try:
-                field.validate()
+                descriptor.validate(self, value)
             except ValidationError:
                 if raise_exception:
                     raise
                 return False
 
         return None if raise_exception else True
-
-
-class DynamicModel(Model):
-    def __init__(self, *args, **kwargs):
-        for field_name, field_value in kwargs.items():
-            setattr(self, field_name, field_value)
-
-    def _get_fields(self) -> Iterator[ModelField]:
-        for field_name in self.get_fields():
-            field_value = getattr(self, field_name)
-            yield ModelField(self, field_name, field_value)
-
-    def get_fields(self) -> Tuple[str, ...]:
-        return tuple(
-            name for name, value in inspect.getmembers(self)
-            if not(name.startswith('_') or inspect.ismethod(value) or inspect.isfunction(value))
-        )
