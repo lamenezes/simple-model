@@ -8,6 +8,7 @@ name = "pypi"
 [packages]
 
 
+
 [dev-packages]
 
 pytest = "*"
@@ -15,3 +16,4 @@ pytest-cov = "*"
 "flake8" = "*"
 mypy = "*"
 sphinx = "*"
+pre-commit = "*"
