@@ -7,4 +7,4 @@ class EmptyField(ValidationError):
         self.field_name = field_name
 
     def __str__(self) -> str:
-        return '{} field cannot be empty'.format(self.field_name)
+        return '{!r} field cannot be empty'.format(self.field_name)
