@@ -14,15 +14,19 @@ class MyModel(Model):
             raise ValidationError()
 
 
-class MyEmptyModel(Model):
-    class Meta:
-        fields = MyModel.Meta.fields
-        allow_empty = '__all__'
+@pytest.fixture
+def model_data():
+    return {
+        'foo': 'foo',
+        'bar': 'bar',
+        'baz': '',
+        'qux': '',
+    }
 
 
 @pytest.fixture
-def model():
-    return MyModel(foo='foo', bar='bar', baz='', qux='')
+def model(model_data):
+    return MyModel(**model_data)
 
 
 @pytest.fixture

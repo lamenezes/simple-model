@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, List
 
 from .models import Model
 from .utils import camel_case, coerce_to_alpha, snake_case
@@ -7,7 +7,7 @@ from .utils import camel_case, coerce_to_alpha, snake_case
 def model_class_builder(class_name: str, data: Any) -> type:
     keys = data.keys() or ('',)
     attrs = {
-        'allow_empty': '__all__',
+        'allow_empty': tuple(keys),
         'fields': tuple(keys),
     }
     Meta = type('Meta', (), attrs)
@@ -35,19 +35,22 @@ def model_builder(
     if not recurse:
         return instance
 
-    for field in instance._get_fields():
-        if isinstance(field.value, Dict):
-            field.value = model_builder(field.value, camel_case(field.name))
-        elif isinstance(field.value, (List, tuple)):
-            field.value = list(field.value)
+    # dafuq
+    for name, value, descriptor in instance._get_fields():
+        if isinstance(value, dict):
+            value = model_builder(value, camel_case(name))
+        elif isinstance(value, (list, tuple)):
+            value = list(value)
 
-            for i, value in enumerate(field.value):
-                if not isinstance(value, Dict):
+            for i, elem in enumerate(value):
+                if not isinstance(elem, dict):
                     continue
-                field.value[i] = model_builder(value, 'NamelessModel')
+                value[i] = model_builder(elem, 'NamelessModel')
 
-            field_class = field.value.__class__
-            field.value = field_class(field.value)
+            field_class = value.__class__
+            value = field_class(value)
+
+        setattr(instance, name, value)
 
     return instance
 
