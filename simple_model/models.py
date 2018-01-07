@@ -23,8 +23,27 @@ class BaseModel(type):
         if not meta:
             meta = type('Meta', (), {})
 
-        meta.fields = getattr(meta, 'fields', ())
-        meta.allow_empty = getattr(meta, 'allow_empty', ())
+        hints = getattr(new_class, '__annotations__', {})
+        try:
+            meta.fields = getattr(meta, 'fields')
+        except AttributeError:  # assume all fields are defined as typed class attributes
+            assert hints, ('Model must have a "fields" attribute on its Meta class or its fields '
+                           'defined as typed class attributes'.format(new_class.__name__))
+            meta.fields = tuple(hints)
+
+        meta.allow_empty = getattr(meta, 'allow_empty', tuple(meta.fields))
+
+        for field_name in meta.fields:
+            field_type = hints.get(field_name) if hints else None
+            default_value = getattr(new_class, field_name, None)
+            field = ModelField(
+                model_class=new_class,
+                name=field_name,
+                default_value=default_value,
+                type=field_type,
+                allow_empty=field_name in meta.allow_empty,
+            )
+            setattr(new_class, field_name, field)
 
         new_class._meta = meta
 
@@ -33,9 +52,15 @@ class BaseModel(type):
 
 class Model(metaclass=BaseModel):
     def __init__(self, **kwargs):
-        for field_name in self.get_fields():
-            field_value = kwargs.get(field_name, None)
+        for field_name in self._meta.fields:
+            descriptor = getattr(type(self), field_name)
+            field_value = kwargs.get(field_name, descriptor.default_value)
             setattr(self, field_name, field_value)
+
+        self.__post_init__(**kwargs)
+
+    def __post_init__(self, **kwargs):
+        pass
 
     def __eq__(self, other: Any) -> bool:
         try:
@@ -43,35 +68,24 @@ class Model(metaclass=BaseModel):
         except (TypeError, ValueError):
             return False
 
-    def __iter__(self) -> Iterator[Tuple[str, Any]]:
+    def __iter__(self) -> Iterator[Tuple[str, Any, ModelField]]:
         self.clean()
 
-        for field in self._get_fields():
-            yield field.name, field.to_python()
+        for name, value, descriptor in self._get_fields():
+            yield name, descriptor.to_python(value)
 
     def __repr__(self) -> str:
         attrs = ', '.join(
-            '{field.name}={field.value!r}'.format(field=field) for field in self._get_fields()
+            '{name}={value!r}'.format(name=name, value=value) for name, value, _ in self._get_fields()
         )
         return '{class_name}({attrs})'.format(class_name=type(self).__name__, attrs=attrs)
 
     def _get_fields(self) -> Iterator[ModelField]:
-        allow_empty_fields = self.get_allow_empty()
-        for field_name in self.get_fields():
-            field_value = getattr(self, field_name)
-            field = ModelField(self, field_name, field_value)
-            allow_empty = '__all__' in allow_empty_fields or field.name in allow_empty_fields
-            field.allow_empty = allow_empty
-            yield field
-
-    def get_fields(self) -> Tuple[str, ...]:
-        assert self._meta.fields, ('{} should include a fields attribute or override '  # type: ignore
-                                   'the get_fields method'.format(type(self).__name__))
-
-        return self._meta.fields  # type: ignore
-
-    def get_allow_empty(self) -> Tuple[str, ...]:
-        return self._meta.allow_empty  # type: ignore
+        cls = type(self)
+        return (
+            (field_name, getattr(self, field_name), getattr(cls, field_name))
+            for field_name in self._meta.fields
+        )
 
     @classmethod
     def build_many(cls, source: Iterable) -> list:

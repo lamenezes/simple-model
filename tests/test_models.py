@@ -2,10 +2,10 @@ import pytest
 import typing
 
 from simple_model.exceptions import EmptyField, ValidationError
-from simple_model import DynamicModel, Model
+from simple_model import Model
 from simple_model.fields import ModelField
 
-from .conftest import MyModel, MyEmptyModel
+from .conftest import MyModel
 
 
 class MyFooBarModel(Model):
@@ -16,39 +16,66 @@ class MyFooBarModel(Model):
         return foo.strip()
 
 
+class TypedModelMeta:
+    fields = (
+        'common',  # common field (no default and no type constraint)
+        'empty',
+        'boolean',
+        'number',
+        'string',
+        'model',
+        'models',
+    )
+    allow_empty = (
+        'empty',
+    )
+
+
 class TypedModel(Model):
-    boolean = False  # default
+    boolean = True  # default
     number: float  # type constraint
-    string: str = ''  # type constraint + default
+    string: str = 'foobar'  # type constraint + default
     model: MyFooBarModel
     models = typing.List[MyFooBarModel]
 
-    class Meta:
-        fields = (
-            'any',  # common field (no default and no type constraint)
-            'empty',
-            'boolean',
-            'number',
-            'string',
-            'model',
-            'models',
-        )
-        allow_empty = (
-            'empty',
-        )
+    Meta = TypedModelMeta
+
+
+class FieldlessTypedModel(TypedModel):
+    Meta = None
 
 
 @pytest.fixture
-def model_clean_validate_foo(model):
-    return MyFooBarModel(foo='foo', bar='bar')
+def model_clean_validate_foo_data():
+    return {'foo': 'foo', 'bar': 'bar'}
+
+
+@pytest.fixture
+def model_clean_validate_foo(model_clean_validate_foo_data):
+    return MyFooBarModel(**model_clean_validate_foo_data)
 
 
 @pytest.fixture
 def nested_model():
-    grandma = MyModel(foo='foo', bar='bar', qux=' qux ')
-    mother = MyModel(foo='foo', bar='bar', baz=grandma, qux=' qux ')
-    child = MyModel(foo='foo', bar='bar', baz=mother, qux=' qux ')
-    grandma.clean_qux = mother.clean_qux = child.clean_qux = lambda s: s.strip()
+    class CleanQuxModel(Model):
+        class Meta:
+            fields = (
+                'foo',
+                'bar',
+                'baz',
+                'qux',
+            )
+
+        def validate_foo(self, value):
+            if len(value) != 3:
+                raise ValidationError()
+
+        def clean_qux(self, value):
+            return value.strip()
+
+    grandma = CleanQuxModel(foo='foo', bar='bar', qux=' qux ')
+    mother = CleanQuxModel(foo='foo', bar='bar', baz=grandma, qux=' qux ')
+    child = CleanQuxModel(foo='foo', bar='bar', baz=mother, qux=' qux ')
     return child
 
 
@@ -58,6 +85,16 @@ def many_source():
         {'foo': '1 foo', 'bar': '1 bar', 'qux': '1 qux'},
         {'foo': '2 foo', 'bar': '2 bar', 'qux': '2 qux'},
         {'foo': '3 foo', 'bar': '3 bar', 'qux': '3 qux'},
+    )
+
+
+@pytest.fixture
+def typed_model(model_clean_validate_foo):
+    return TypedModel(
+        common='common',
+        number=6.9,
+        model=model_clean_validate_foo,
+        models=[model_clean_validate_foo] * 2,
     )
 
 
@@ -80,10 +117,10 @@ def test_base_model_repr(model_clean_validate_foo):
 
 
 def test_base_model__get_fields(model_clean_validate_foo):
-    for field in model_clean_validate_foo._get_fields():
-        assert field.name in ('foo', 'bar')
-        assert isinstance(field, ModelField)
-        assert field.allow_empty is False
+    for name, value, descriptor in model_clean_validate_foo._get_fields():
+        assert name in ('foo', 'bar')
+        assert value in ('foo', 'bar')
+        assert isinstance(descriptor, ModelField)
 
 
 @pytest.mark.parametrize('value', (False, 0, 'foo', 10, {'foo': 'bar'}, [1]))
@@ -119,23 +156,24 @@ def test_base_model_validate_success(model):
 
 
 def test_base_model_validate_fail(model):
-    model.foo = 'abc'
-    model.get_fields = lambda: ('foo', 'bar')
+    class MyModel(type(model)):
+        class Meta:
+            fields = ('foo', 'bar')
 
-    def validate_foo(value):
-        if value != 'foo':
-            raise ValidationError()
+        def validate_foo(self, value):
+            if value != 'foo':
+                raise ValidationError()
 
-    model.validate_foo = validate_foo
+    my_model = MyModel(foo='abc', bar='bar')
 
-    assert model.validate(raise_exception=False) is False
+    assert my_model.validate(raise_exception=False) is False
     with pytest.raises(ValidationError):
-        model.validate()
+        my_model.validate()
 
 
-def test_base_model___eq___equals(model):
+def test_base_model___eq___equals():
+    model = MyFooBarModel(foo='foo', bar='bar')
     other_model = MyFooBarModel(foo='foo', bar='bar')
-    other_model.get_fields = model.get_fields = lambda: ('foo', 'bar')
 
     assert model == model
     assert model is model
@@ -178,55 +216,17 @@ def test_model_fields_allow_empty():
     assert model.qux is None
 
 
-def test_model_fields_allow_empty__all__():
-    model = MyEmptyModel()
-
-    model.validate()
-
-    assert model.foo is None
-    assert model.bar is None
-    assert model.baz is None
-    assert model.qux is None
-
-
 def test_model__get_fields(model):
-    for field in model._get_fields():
-        assert field.allow_empty is (field.name in model._meta.allow_empty)
+    for name, value, descriptor in model._get_fields():
+        assert name in model._meta.fields
+        assert value == getattr(model, name)
+        assert isinstance(descriptor, ModelField)
 
 
-def test_model_get_fields():
-    class MyGetFieldsModel(MyModel):
-        def get_fields(self):
-            return self._meta.fields + ('birl',)
-
-    model = MyGetFieldsModel(foo='foo', bar='bar', birl='birl')
-    assert model.validate(raise_exception=False)
-
-
-def test_model_get_fields_without_fields():
-    class FieldlessModel(Model):
-        pass
-
-    assert FieldlessModel._meta.fields == ()
+def test_model_fields_without_fields():
     with pytest.raises(AssertionError):
-        FieldlessModel().get_fields()
-
-
-def test_model_get_allow_empty():
-    class MyGetFieldsModel(MyModel):
-        def get_allow_empty(self):
-            return self._meta.allow_empty + ('bar',)
-
-    model = MyGetFieldsModel(foo='foo')
-    assert model.validate(raise_exception=False)
-
-
-def test_model_get_allow_empty_without_fields():
-    class AllowEmptylessModel(Model):
-        class Meta:
-            fields = ('a', 'b')
-
-    assert AllowEmptylessModel().get_allow_empty() == ()
+        class FieldlessModel(Model):
+            pass
 
 
 @pytest.mark.parametrize('value', (False, 0))
@@ -314,14 +314,30 @@ def test_model_clean_without_clean_method(model):
         assert getattr(model, field_name) == field_name
 
 
-def test_model_clean(model):
-    for field_name in model._meta.fields:
-        setattr(model, field_name, ' {} '.format(field_name))
-        setattr(model, 'clean_{}'.format(field_name), lambda s: s.strip())
+def test_model_clean():
+    fields = ('foo', 'bar', 'baz')
 
+    class CleanyModel(Model):
+        class Meta:
+            fields = ('foo', 'bar', 'baz')
+
+        def clean_foo(self, value):
+            return value.strip()
+
+        def clean_bar(self, value):
+            return value.strip()
+
+        def clean_baz(self, value):
+            return value.strip()
+
+    model = CleanyModel(
+        foo=' foo ',
+        bar=' bar ',
+        baz=' baz ',
+    )
     model.clean()
 
-    for field_name in model._meta.fields:
+    for field_name in fields:
         assert getattr(model, field_name) == field_name
 
 
@@ -334,38 +350,29 @@ def test_model_clean_nested(nested_model):
 
 
 def test_model_iter_clean(model):
-    model.bar = ' bar '
-    model.clean_bar = lambda f: f.strip()
+    class CleanBarMyModel(Model):
+        class Meta:
+            fields = (
+                'foo',
+                'bar',
+                'baz',
+                'qux',
+            )
+
+        def clean_bar(self, value):
+            return value.strip()
+
+    model = CleanBarMyModel(foo='foo', bar=' bar ', baz='', qux='')
     model.clean()
     as_dict = dict(model)
     assert as_dict == {'foo': 'foo', 'bar': 'bar', 'baz': '', 'qux': ''}
 
 
 def test_model_get_fields_invalid():
-    FieldlessModel = type('FieldlessModel', (Model,), {})
     with pytest.raises(AssertionError) as exc:
-        FieldlessModel()
+        type('FieldlessModel', (Model,), {})
 
-    assert 'should include a fields attr' in str(exc)
-
-
-def test_dynamic_model_get_fields():
-    assert DynamicModel().get_fields() == ()
-
-    model = DynamicModel(foo='le foo', bar='le bar')
-    fields = model.get_fields()
-    assert 'bar' in fields
-    assert 'foo' in fields
-
-    model.baz = 'le baz'
-    fields = model.get_fields()
-    assert 'baz' in fields
-    assert len(fields) == 3
-
-    model._private = "it's private!"
-    fields = model.get_fields()
-    assert '_private' not in fields
-    assert len(fields) == 3
+    assert 'must have a "fields" attr' in str(exc)
 
 
 def test_build_many(many_source):
@@ -384,3 +391,35 @@ def test_build_many_empty_iterable():
 def test_build_many_different_items():
     with pytest.raises(ValueError):
         MyModel.build_many([{'a': 1}, {'b': 2}])
+
+
+def test_typed_model_meta():
+    assert sorted(TypedModel._meta.fields) == sorted(TypedModelMeta.fields)
+    assert sorted(TypedModel._meta.allow_empty) == sorted(TypedModelMeta.allow_empty)
+
+
+def test_type_model(typed_model, model_clean_validate_foo):
+    assert typed_model.number == 6.9
+    assert typed_model.boolean is True
+    assert typed_model.string == 'foobar'
+    assert typed_model.common == 'common'
+    assert typed_model.model == model_clean_validate_foo
+    assert typed_model.models == [model_clean_validate_foo] * 2
+
+
+def test_typed_model_clean_type_conversion(
+    typed_model, model_clean_validate_foo_data, model_clean_validate_foo
+):
+    typed_model.common = 'common'
+    typed_model.number = '6.9'
+    typed_model.string = 6.9
+    typed_model.model = model_clean_validate_foo_data
+    typed_model.models = [model_clean_validate_foo_data] * 2
+
+    typed_model.clean()
+
+    assert typed_model.number == 6.9
+    assert typed_model.string == '6.9'
+    assert typed_model.common == 'common'
+    assert typed_model.model == model_clean_validate_foo
+    assert typed_model.models == [model_clean_validate_foo] * 2
