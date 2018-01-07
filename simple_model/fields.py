@@ -1,92 +1,94 @@
-from typing import List
+from typing import Any, List, Tuple
 
 from .exceptions import EmptyField
 
+PARAMETRIZED_GENERICS = (List, Tuple)
+
 
 class ModelField:
-    def __init__(self, model, name, value, allow_empty=True):
-        self._model = model
-        self._name = name
-        self._value = value
+    def __init__(self, model_class, name, default_value=None, type=None, allow_empty=False):
+        self.model_class = model_class
+        self.name = name
+        self.default_value = default_value
+        self.type = type
         self.allow_empty = allow_empty
 
         try:
-            self._validate = getattr(model, 'validate_{}'.format(name))
+            self._validate = getattr(model_class, 'validate_{}'.format(name))
         except AttributeError:
             self._validate = None
 
         try:
-            self._clean = getattr(model, 'clean_{}'.format(name))
+            self._clean = getattr(model_class, 'clean_{}'.format(name))
         except AttributeError:
             self._clean = None
 
-    def __repr__(self):
-        return '{class_name}({field.name}={field.value!r})'.format(
-            class_name=type(self).__name__,
-            field=self,
-        )
+    def convert_to_type(self, instance, value):
+        if not self.type or self.type is Any:
+            return value
 
-    def __str__(self):
-        return str(self.value)
+        if not issubclass(self.type, PARAMETRIZED_GENERICS) and isinstance(value, self.type):
+            return value
 
-    def _set_model_value(self, value):
-        if value is self._model:
-            raise TypeError('Cannot set {!r} value to the model it is part of'.format(self))
+        from simple_model.models import Model
+        if issubclass(self.type, Model):
+            return self.type(**value)
 
-        setattr(self._model, self.name, value)
+        if issubclass(self.type, (list, tuple)):
+            element_type = self.type.__args__[0] if self.type.__args__ else None
+            if not element_type:
+                return value
 
-    @property
-    def name(self):
-        return self._name
+            values = []
+            for elem in value:
+                if not isinstance(elem, element_type):
+                    elem = element_type(elem)
+                values.append(elem)
 
-    @property
-    def value(self):
-        return self._value
+            iterable_type = tuple if issubclass(self.type, tuple) else list
+            return iterable_type(values)
 
-    @value.setter
-    def value(self, value):
-        self._value = value
-        self._set_model_value(value)
+        return self.type(value)
 
-    def clean(self):
-        if self._clean:
-            self.value = self._clean(self.value)
+    def clean(self, instance, value):
+        value = self.convert_to_type(instance, value)
+        clean_value = value if not self._clean else self._clean(instance, value)
 
         try:
-            self.value.clean()
+            value.clean()
         except AttributeError:
             pass
 
-        self.validate()
-        return self.value
+        self.validate(instance, value)
+        return clean_value
 
-    def validate(self):
-        if not self.allow_empty and self._model.is_empty(self.value):
+    def validate(self, instance, value):
+        if not self.allow_empty and self.model_class.is_empty(value):
             raise EmptyField(self.name)
 
         if self._validate:
-            return self._validate(self.value)
+            return self._validate(instance, value)
 
         try:
-            self.value.validate()
+            value.validate()
         except AttributeError:
             return
 
-    def to_python(self):
-        if isinstance(self.value, (List, tuple)):
+    def to_python(self, value):
+        if isinstance(value, (list, tuple)):
             python_value = []
-            for value in self.value:
+            for elem in value:
                 try:
-                    value = dict(value)
+                    elem = dict(elem)
                 except (TypeError, ValueError):
                     pass
-                python_value.append(value)
+                python_value.append(elem)
             return python_value
 
-        if not self.value:
-            return self.value
+        if not value:
+            return value
 
         try:
-            return dict(self.value)
+            return dict(value)
         except (TypeError, ValueError):
-            return self.value
+            return value

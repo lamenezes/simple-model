@@ -3,7 +3,8 @@ from unittest import mock
 import pytest
 
 from simple_model.exceptions import EmptyField, ValidationError
-from simple_model.models import ModelField
+from simple_model.fields import ModelField
+from simple_model.models import Model
 
 from .conftest import MyModel
 
@@ -14,67 +15,55 @@ class MyValidationError(ValidationError):
 
 @pytest.fixture
 def model_field():
-    model = MyModel(foo='foo', bar='bar', baz='', qux='')
-    return ModelField(model, name='bar', value=1, allow_empty=True)
+    return ModelField(MyModel, name='bar', default_value='default', type=str, allow_empty=True)
 
 
 def test_model_field(model_field):
-    assert model_field._model
-    assert model_field.value == 1
+    assert issubclass(model_field.model_class, Model)
     assert model_field.name == 'bar'
+    assert model_field.default_value == 'default'
+    assert issubclass(str, model_field.type)
     assert model_field.allow_empty is True
-    assert str(model_field) == '1'
-    assert 'bar=1' in repr(model_field)
-
-
-def test_model_field_set_value_to_its_own_model(model_field):
-    with pytest.raises(TypeError):
-        model_field.value = model_field._model
 
 
 @pytest.mark.parametrize('value', (1, '1', [2], ['2']))
 def test_model_field_to_python_simple(model_field, value):
-    model_field.value = value
-    assert model_field.to_python() == value
+    assert model_field.to_python(value) == value
 
 
 def test_model_field_to_python_nested(model2, model_field):
-    model_field.value = model2
-    assert model_field.to_python() == dict(model2)
+    assert model_field.to_python(model2) == dict(model2)
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))
 def test_model_field_to_python_nested_iterable(iterable, model_field, model, model2):
-    model_field.value = iterable([model, model2])
-    assert model_field.to_python() == [dict(model), dict(model2)]
+    assert model_field.to_python(iterable([model, model2])) == [dict(model), dict(model2)]
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))
 def test_model_field_to_python_iterable_empty(iterable, model_field, model, model2):
-    model_field.value = iterable([])
-    assert model_field.to_python() == []
+    assert model_field.to_python(iterable([])) == []
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))
 def test_model_field_to_python_iterable(iterable, model_field, model, model2):
-    model_field.value = iterable([1, 2, 3])
-    assert model_field.to_python() == [1, 2, 3]
+    assert model_field.to_python(iterable([1, 2, 3])) == [1, 2, 3]
 
 
-def test_model_field_validate(model_field):
+def test_model_field_validate(model, model_field):
     validate = mock.MagicMock(return_value=None)
     model_field._validate = validate
 
-    assert model_field.validate() is None
+    assert model_field.validate(None, None) is None
 
 
 @pytest.mark.parametrize('exception', (ValidationError, EmptyField, MyValidationError))
-def test_model_field_validate_validation_error(model_field, exception):
+def test_model_field_validate_validation_error(model, model_field, exception):
     validate = mock.MagicMock(side_effect=exception('foo'))
     model_field._validate = validate
 
     with pytest.raises(exception):
-        model_field.validate()
+        model_field.validate(None, None)
 
 
 @pytest.mark.parametrize('blank_value', (None, '', [], {}, ()))
@@ -82,51 +71,100 @@ def test_model_field_validate_empty_field(model_field, blank_value):
     model_field.allow_empty = False
     model_field.value = blank_value
     with pytest.raises(EmptyField):
-        model_field.validate()
+        model_field.validate(None, None)
 
 
 def test_model_field_clean(model_field):
-    model_field._clean = lambda s: s.strip()
-    model_field.value = ' foo '
+    model_field._clean = lambda _, s: s.strip()
 
-    model_field.clean()
-
-    assert model_field.value == 'foo'
+    assert model_field.clean(None, ' foo ') == 'foo'
 
 
-def test_model_field_clean_invalid(model_field):
-    model_field._clean = lambda s: s.strip()
-    model_field._validate = model_field._model.validate_foo
-    model_field.value = ' fo '
+def test_model_field_clean_invalid(model, model_field):
+    model_field._clean = lambda _, s: s.strip()
+    model_field._validate = type(model).validate_foo
 
     with pytest.raises(ValidationError):
-        model_field.clean()
+        model_field.clean(None, ' fo ')
 
 
 def test_model_field_clean_without_clean_method(model_field):
     model_field._clean = None
-    model_field.value = ' foo '
 
-    model_field.clean()
-
-    assert model_field.value == ' foo '
+    assert model_field.clean(None, ' foo ') == ' foo '
 
 
-def test_model_field_clean_without_clean_method_invalid(model_field):
+def test_model_field_clean_without_clean_method_invalid(model, model_field):
     model_field._clean = None
-    model_field._validate = model_field._model.validate_foo
-    model_field.value = ' fo '
+    model_field._validate = model_field.model_class.validate_foo
 
     with pytest.raises(ValidationError):
-        model_field.clean()
+        model_field.clean(None, ' fo ')
 
 
-def test_model_field_clean_nested(model_field):
-    model_field._clean = lambda s: s.strip()
-    model_field.value = ' foo '
+def test_model_field_clean_nested(model):
+    class MyModel(Model):
+        class Meta:
+            fields = (
+                'foo',
+                'bar',
+                'baz',
+            )
 
-    model = MyModel(foo='foo', bar='bar', baz=model_field)
+        def clean_foo(self, value):
+            return value.strip()
+
+    model = MyModel(foo=' foo ', bar='bar', baz='baz')
+    other_model = MyModel(foo='foo', bar='bar', baz=model)
+
+    other_model.clean()
+
+    assert model.foo == 'foo'
+
+
+def test_model_field_clean_type_conversion(model):
+    OtherModel = type(model)
+    from typing import Any, List, Tuple
+
+    class TypedModel(Model):
+        any: Any
+        iterable: List
+        model: OtherModel
+        models: List[OtherModel]
+        number: float
+        numbers: List[float]
+        string: str
+        strings: Tuple[str]
+
+    class Foo:
+        def __init__(self, foo):
+            pass
+
+    iterable = ['1', 2, '3']
+    model = TypedModel(
+        any=Foo('toba'),
+        iterable=list(iterable),
+        model={'foo': 'foo', 'bar': 'bar'},
+        models=[model],
+        number='10',
+        numbers=list(iterable),
+        string=1,
+        strings=tuple(iterable),
+    )
 
     model.clean()
-
-    assert model_field.value == 'foo'
+    assert isinstance(model.any, Foo)
+    assert isinstance(model.iterable, list)
+    assert model.iterable == iterable
+    assert isinstance(model.model, TypedModel.model.type)
+    assert isinstance(model.models, list)
+    for elem in model.models:
+        assert isinstance(elem, TypedModel.models.type.__args__[0])
+    assert isinstance(model.number, TypedModel.number.type)
+    assert isinstance(model.numbers, list)
+    for elem in model.numbers:
+        assert isinstance(elem, TypedModel.numbers.type.__args__[0])
+    assert isinstance(model.string, TypedModel.string.type)
+    assert isinstance(model.strings, tuple)
+    for elem in model.strings:
+        assert isinstance(elem, TypedModel.strings.type.__args__[0])
