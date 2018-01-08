@@ -1,3 +1,4 @@
+import typing
 from typing import Any, Iterable, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
@@ -22,7 +23,7 @@ class BaseModel(type):
         if not meta:
             meta = type('Meta', (), {})
 
-        hints = getattr(new_class, '__annotations__', {})
+        hints = typing.get_type_hints(new_class)
         try:
             meta.fields = getattr(meta, 'fields')
         except AttributeError:  # assume all fields are defined as typed class attributes
