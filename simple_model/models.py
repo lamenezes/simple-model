@@ -67,7 +67,7 @@ class Model(metaclass=BaseModel):
         except (TypeError, ValueError):
             return False
 
-    def __iter__(self) -> Iterator[Tuple[str, Any, ModelField]]:
+    def __iter__(self) -> Iterator[Tuple[str, Any]]:
         self.clean()
 
         for name, value, descriptor in self._get_fields():
@@ -79,11 +79,11 @@ class Model(metaclass=BaseModel):
         )
         return '{class_name}({attrs})'.format(class_name=type(self).__name__, attrs=attrs)
 
-    def _get_fields(self) -> Iterator[ModelField]:
+    def _get_fields(self) -> Iterator[Tuple[str, Any, ModelField]]:
         cls = type(self)
         return (
             (field_name, getattr(self, field_name), getattr(cls, field_name))
-            for field_name in self._meta.fields
+            for field_name in self._meta.fields  # type: ignore
         )
 
     @classmethod
