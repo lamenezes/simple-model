@@ -1,14 +1,68 @@
-from setuptools import setup, find_packages
+import os
+import re
+import sys
+from pathlib import Path
+from shutil import rmtree
+
+from setuptools import setup, find_packages, Command
+
+here = Path.cwd()
+with open(here / 'README.rst') as f:
+    readme = f.read()
+
+with open(here / 'CHANGES.rst') as f:
+    changes = f.read()
+    version_match = re.search(r'\n(\d+.\d+.\d+) /', changes)
+    version = version_match.groups()[0]
+
+
+class UploadCommand(Command):
+    """Support setup.py publish."""
+
+    description = 'Build and publish the package.'
+    user_options = []
+
+    @staticmethod
+    def status(s):
+        """Prints things in bold."""
+        print('\033[1m{0}\033[0m'.format(s))
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        try:
+            self.status('Removing previous builds…')
+            rmtree(os.path.join(here, 'dist'))
+        except FileNotFoundError:
+            pass
+
+        self.status('Building Source distribution…')
+        os.system('{0} setup.py sdist'.format(sys.executable))
+
+        self.status('Uploading the package to PyPi via Twine…')
+        os.system('twine upload dist/*')
+
+        self.status('Pushing git tags…')
+        os.system('git tag v{0}'.format(version))
+        os.system('git push --tags')
+
+        sys.exit()
+
 
 setup(
     name='pysimplemodel',
-    version='0.15.0',
+    version=version,
     description='Simple Models for Python',
+    long_description='\n'.join([readme, changes]),
     url='https://github.com/lamenezes/simple-model',
     author='Luiz Menezes',
     author_email='luiz.menezesf@gmail.com',
-    long_description=open('README.rst').read(),
-    packages=find_packages(exclude=['tests*']),
+    packages=find_packages(exclude=['tests']),
+    license='MIT',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -17,4 +71,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries',
     ],
+    cmdclass={
+        'upload': UploadCommand,
+    },
 )
