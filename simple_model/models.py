@@ -36,6 +36,8 @@ class BaseModel(type):
         for field_name in meta.fields:
             field_type = hints.get(field_name) if hints else None
             default_value = getattr(new_class, field_name, None)
+            if isinstance(default_value, ModelField):
+                default_value = default_value.default_value
             field = ModelField(
                 model_class=new_class,
                 name=field_name,

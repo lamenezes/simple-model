@@ -8,7 +8,7 @@ from simple_model.fields import ModelField
 from .conftest import MyModel
 
 
-class MyFooBarModel(Model):
+class FooBarModel(Model):
     class Meta:
         fields = ('foo', 'bar')
 
@@ -35,14 +35,10 @@ class TypedModel(Model):
     boolean = True  # default
     number: float  # type constraint
     string: str = 'foobar'  # type constraint + default
-    model: MyFooBarModel
-    models = typing.List[MyFooBarModel]
+    model: FooBarModel
+    models = typing.List[FooBarModel]
 
     Meta = TypedModelMeta
-
-
-class FieldlessTypedModel(TypedModel):
-    Meta = None
 
 
 @pytest.fixture
@@ -52,7 +48,7 @@ def model_clean_validate_foo_data():
 
 @pytest.fixture
 def model_clean_validate_foo(model_clean_validate_foo_data):
-    return MyFooBarModel(**model_clean_validate_foo_data)
+    return FooBarModel(**model_clean_validate_foo_data)
 
 
 @pytest.fixture
@@ -172,8 +168,8 @@ def test_base_model_validate_fail(model):
 
 
 def test_base_model___eq___equals():
-    model = MyFooBarModel(foo='foo', bar='bar')
-    other_model = MyFooBarModel(foo='foo', bar='bar')
+    model = FooBarModel(foo='foo', bar='bar')
+    other_model = FooBarModel(foo='foo', bar='bar')
 
     assert model == model
     assert model is model
@@ -187,7 +183,7 @@ def test_base_model___eq___equals():
 
 
 def test_base_model___eq___not_equals(model):
-    other_model = MyFooBarModel(foo='bar', bar='foo')
+    other_model = FooBarModel(foo='bar', bar='foo')
     other_model.get_fields = model.get_fields = lambda: ('foo', 'bar')
 
     assert model != other_model
@@ -423,6 +419,71 @@ def test_typed_model_clean_type_conversion(
     assert typed_model.common == 'common'
     assert typed_model.model == model_clean_validate_foo
     assert typed_model.models == [model_clean_validate_foo] * 2
+
+
+def test_model_inheritance_with_meta_fields():
+    class SubTypedModel(TypedModel):
+        other_string: str
+        sub: typing.Any = None
+
+        class Meta:
+            fields = (
+                'boolean',
+                'common',  # common field (no default and no type constraint)
+                'empty',
+                'model',
+                'models',
+                'number',
+                'other_string',
+                'string',
+                'sub',
+            )
+            allow_empty = (
+                'empty',
+            )
+
+    model = SubTypedModel(
+        common='common',
+        number=6.9,
+        model=model_clean_validate_foo,
+        models=[model_clean_validate_foo] * 2,
+        other_string='other',
+    )
+
+    assert model.boolean
+    assert model.common
+    assert model.empty is None
+    assert model.number
+    assert model.string
+    assert model.model
+    assert model.models
+    assert model.other_string
+    assert model.sub is None
+
+
+def test_model_inheritance_without_meta_fields():
+    class SuperModel(Model):
+        foo: str
+        bar: str
+
+    class SubModel(SuperModel):
+        bar: int
+        baz: str
+        qux: str
+
+        class Meta:
+            allow_empty = ('foo',)
+
+    model = SubModel(
+        bar=10,
+        baz='baz',
+        qux='qux',
+    )
+
+    model.clean()
+    assert model.bar
+    assert model.baz
+    assert model.qux
 
 
 def test_model_inheritance_meta_inheritance():
