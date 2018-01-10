@@ -423,3 +423,30 @@ def test_typed_model_clean_type_conversion(
     assert typed_model.common == 'common'
     assert typed_model.model == model_clean_validate_foo
     assert typed_model.models == [model_clean_validate_foo] * 2
+
+
+def test_model_inheritance_meta_inheritance():
+    class SuperModel(Model):
+        foo: str
+        bar: str
+
+        class Meta:
+            fields = ('foo', 'bar')
+            allow_empty = ('foo', 'bar')
+
+    class SubModel(SuperModel):
+        bar: int
+        baz: str
+        qux: str
+
+        class Meta(SuperModel.Meta):
+            fields = ('foo', 'bar', 'baz', 'qux')
+
+    model = SubModel(
+        baz='baz',
+        qux='qux',
+    )
+
+    model.validate()
+    assert model.baz
+    assert model.qux

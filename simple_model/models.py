@@ -18,7 +18,7 @@ class BaseModel(type):
             return super_new(cls, name, bases, attrs)
 
         new_class = super_new(cls, name, bases, attrs, **kwargs)
-        attr_meta = attrs.pop('Meta', None)
+        attr_meta = attrs.get('Meta')
         meta = attr_meta if attr_meta else getattr(new_class, 'Meta', None)
         if not meta:
             meta = type('Meta', (), {})
