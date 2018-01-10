@@ -1,4 +1,6 @@
-clean: clean-eggs clean-build
+.PHONY: docs
+
+clean: clean-eggs clean-build clean-docs
 	@find . -iname '*.pyc' -delete
 	@find . -iname '*.pyo' -delete
 	@find . -iname '*~' -delete
@@ -14,19 +16,12 @@ clean-build:
 	@rm -fr dist/
 	@rm -fr *.egg-info
 
-build: clean
-	python setup.py sdist
+clean-docs:
+	@rm -fr docs/build/
+
+docs:
+	cd docs && make html
 
 test:
-	py.test
-	mypy simple_model
-
-release-patch: build test
-	bumpversion patch
-	git push origin master --tags
-	twine upload dist/*
-
-release-minor: build test
-	bumpversion minor
-	git push origin master --tags
-	twine upload dist/*
+	pipenv run py.test tests/ --cov simple_model
+	pipenv run mypy simple_model

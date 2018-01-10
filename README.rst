@@ -4,18 +4,19 @@ Simple Model
 
 .. image:: https://badge.fury.io/py/pysimplemodel.svg
     :target: https://github.com/lamenezes/simple-model
-    
-.. image:: https://img.shields.io/badge/python-3.4%2C%203.5%2C%203.6-blue.svg
+
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
     :target: https://github.com/lamenezes/simple-model
-    
+
 .. image:: https://img.shields.io/github/license/lamenezes/simple-model.svg
-    :target: https://github.com/lamenezes/simple-model/blob/master/LICENSE    
-    
+    :target: https://github.com/lamenezes/simple-model/blob/master/LICENSE
+
 .. image:: https://travis-ci.org/lamenezes/simple-model.svg?branch=master
     :target: https://travis-ci.org/lamenezes/simple-model
-    
+
 .. image:: https://coveralls.io/repos/github/lamenezes/simple-model/badge.svg?branch=master
     :target: https://coveralls.io/github/lamenezes/simple-model?branch=master
+
 
 *SimpleModel* offers a simple way to handle data using classes instead of a
 plenty of lists and dicts.
@@ -31,7 +32,7 @@ frameworks that does a lot of cool stuff.
 
 .. contents:: **Table of Contents**
 
---------------
+
 How to install
 --------------
 
@@ -39,21 +40,7 @@ How to install
 
     pip install pysimplemodel
 
-----------------------------
-Roadmap for simple model 1.0
-----------------------------
 
-Feature:
-
-1. model customization inside Meta class and not the inside the model
-   (as currently it is)
-2. typing + default values via type hints
-3. simplified changelog
-4. model inheritance (probably on 1.1)
-5. improve docs using sphinx + read the docs (maybe)
-
-
-----------
 How to use
 ----------
 
@@ -64,25 +51,44 @@ How to use
 
 
     class Person(Model):
-        fields = ('name', 'age', 'height', 'weight')
-        allow_empty = ('height', 'weight')
+        age: int
+        height: float
+        name: str
+        weight: float
 
-        def validate_age(self, value):
-            if 0 > value > 150:
-                raise ValidationError
+        class Meta:
+            allow_empty = ('height', 'weight')
 
-        def validate_height(self, value):
-            if value <= 0:
-                raise ValidationError
+        def clean_name(self, name):
+            return name.strip()
+
+        def validate_age(self, age):
+            if 0 > age > 150:
+                raise ValidationError('Invalid value for age "{!r}"'.format(age))
+
+        def validate_height(self, height):
+            if height <= 0:
+                raise ValidationError('Invalid value for height "{!r}"'.format(age))
 
 .. code:: python
 
-    >> person = Person(name='John Doe', age=18)
-    >> person.name
+    >>> person = Person(age=18.0, name='John Doe ')
+    >>> person.name
+    'John Doe '
+    >>> person.clean()
+    >>> person.name
     'John Doe'
-    >> person.validate()
-    >> dict(person)
-    {'name': 'John Doe', 'age': 18, 'height': '', 'weight': ''}
+    >>> person.age
+    18
+    >>> person.validate(raise_exception=False)
+    True
+    >>> dict(person)
+    {
+        'age': 18,
+        'height': '',
+        'name': 'John Doe',
+        'weight': '',
+    }
 
 
 Validation
@@ -92,12 +98,12 @@ Model values aren't validated until the `validated` method is called:
 
 .. code:: python
 
-    >> person = Person()  # no exception
-    >> person.validate()
+    >>> person = Person()  # no exception
+    >>> person.validate()
     ...
     EmptyField: name field cannot be empty
-    >> person = Person(name='Jane Doe', age=60)
-    >> person.validate()  # now it's ok!
+    >>> person = Person(name='Jane Doe', age=60)
+    >>> person.validate()  # now it's ok!
 
 
 You may change the validate method to return a boolean instead of raising an
@@ -105,8 +111,8 @@ exception:
 
 .. code:: python
 
-    >> person = Person()
-    >> person.validate(raise_exception=False)
+    >>> person = Person()
+    >>> person.validate(raise_exception=False)
     False
     >>> person = Person(name='Jane Doe', age=60)
     >>> person.validate(raise_exception=False)
@@ -122,19 +128,18 @@ easily done using simple-model:
 .. code:: python
 
     class CleanPerson(Model):
-        fields = ('name', 'age')
+        age: int
+        name: str
 
-        def clean_name(self, value):
-            return value.strip()
+        def clean_name(self, name):
+            return name.strip()
 
-        def clean_age(self, value):
-            return int(value)
 
-    >> person = CleanPerson(name='John Doe  \n', age='10')
-    >> person.name, person.age
+    >>> person = CleanPerson(name='John Doe  \n', age='10')
+    >>> person.name, person.age
     ('John Doe  \n', '10')
-    >> person.clean()
-    >> person.name, person.age
+    >>> person.clean()
+    >>> person.name, person.age
     ('John Doe', 10)
 
 
@@ -146,8 +151,11 @@ to the `build_many` method.
 
 .. code:: python
 
-    people = [{'name': 'John Doe'}, {'name': 'John Doe II'}]
-    models = Person.build_many(people)
+    >>> people = [
+        {'name': 'John Doe'},
+        {'name': 'John Doe II'},
+    ]
+    >>> models = Person.build_many(people)
 
 
 Conversion to Dict
@@ -157,9 +165,14 @@ To convert to dict is pretty straight-forward task:
 
 .. code:: python
 
-    >> person = Person(name='Jane Doe', age=60)
-    >> dict(person)
-    {'age': 60, 'height': None, 'name': 'Jane Doe', 'weight': None}
+    >>> person = Person(name='Jane Doe', age=60)
+    >>> dict(person)
+    {
+        'age': 60,
+        'height': None,
+        'name': 'Jane Doe',
+        'weight': None,
+    }
 
 
 Simple model also supports dict conversion of nested models:
@@ -167,25 +180,40 @@ Simple model also supports dict conversion of nested models:
 .. code:: python
 
     class SocialPerson(Model):
-        fields = ('name', 'friend')
+        friend: Person
+        name: str
 
-    >> person = Person(name='Jane Doe', age=60)
-    >> other_person = SocialPerson(name='John Doe', friend=person)
-    >> dict(other_person)
-    {'friend': {'age': 60, 'height': None, 'name': 'Jane Doe', 'weight': None}, 'name': 'John Doe'}
+
+    >>> person = Person(name='Jane Doe', age=60)
+    >>> other_person = SocialPerson(name='John Doe', friend=person)
+    >>> dict(other_person)
+    {
+        'friend': {
+            'age': 60,
+            'height': None,
+            'name': 'Jane Doe',
+            'weight': None,
+        },
+        'name': 'John Doe',
+    }
 
 
 It also supports nested models as lists:
 
 .. code:: python
 
-    class MoreSocialPerson(Model):
-        fields = ('name', 'friends')
+    import typing
 
-    >> person = Person(name='Jane Doe', age=60)
-    >> other_person = Person(name='John Doe', age=15)
-    >> social_person = MoreSocialPerson(name='Foo Bar', friends=[person, other_person])
-    >> dict(social_person)
+
+    class MoreSocialPerson(Model):
+        friends: typing.List[Friend]
+        name: str
+
+
+    >>> person = Person(name='Jane Doe', age=60)
+    >>> other_person = Person(name='John Doe', age=15)
+    >>> social_person = MoreSocialPerson(name='Foo Bar', friends=[person, other_person])
+    >>> dict(social_person)
     {
         'name': 'Foo Bar',
         'friends': [
@@ -193,13 +221,13 @@ It also supports nested models as lists:
                 'age': 60,
                 'height': None,
                 'name': 'Jane Doe',
-                'weight': None
+                'weight': None,
             },
             {
                 'age': 15,
                 'height': None,
                 'name': 'John Doe',
-                'weight': None
+                'weight': None,
             }
         ]
     }

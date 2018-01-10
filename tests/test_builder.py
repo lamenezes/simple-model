@@ -10,8 +10,8 @@ def test_model_class_builder():
 
     assert isinstance(birl, Model)
     keys = ('f', 'b')
-    assert len(Birl.fields) == len(keys)
-    assert set(Birl.fields) == set(keys)
+    assert len(Birl._meta.fields) == len(keys)
+    assert set(Birl._meta.fields) == set(keys)
 
     assert birl.clean() is None
     assert birl.validate(raise_exception=False) is True
@@ -79,22 +79,22 @@ def test_model_builder_recurse():
 
 @pytest.mark.parametrize('iterable_class', (tuple, list))
 def test_model_builder_recurse_iterable(iterable_class):
-    my_model = iterable_class([{'baz': 'baz', 'qux': 'qux'}, 1, 2])
+    models = iterable_class([{'baz': 'baz', 'qux': 'qux'}, 1, 2])
     data = {
         'foo': 'foo',
         'bar': 'bar',
-        'my_model': my_model,
+        'models': models,
     }
     birl = model_builder(data)
     assert birl.foo == 'foo'
     assert birl.bar == 'bar'
-    assert birl.my_model[0].baz == 'baz'
-    assert birl.my_model[0].qux == 'qux'
-    assert birl.my_model[1] == 1
-    assert birl.my_model[2] == 2
+    assert birl.models[0].baz == 'baz'
+    assert birl.models[0].qux == 'qux'
+    assert birl.models[1] == 1
+    assert birl.models[2] == 2
 
-    assert isinstance(birl.my_model[0], Model)
-    assert type(birl.my_model[0]).__name__ == 'NamelessModel'
+    assert isinstance(birl.models[0], Model)
+    assert type(birl.models[0]).__name__ == 'NamelessModel'
 
 
 def test_model_builder_data_keys_with_special_characters():

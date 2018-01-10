@@ -5,22 +5,28 @@ from simple_model.models import Model
 
 
 class MyModel(Model):
-    fields = ('foo', 'bar', 'baz', 'qux')
-    allow_empty = ('baz', 'qux')
+    class Meta:
+        fields = ('foo', 'bar', 'baz', 'qux')
+        allow_empty = ('baz', 'qux')
 
     def validate_foo(self, value):
         if len(value) != 3:
             raise ValidationError()
 
 
-class MyEmptyModel(Model):
-    fields = MyModel.fields
-    allow_empty = '__all__'
+@pytest.fixture
+def model_data():
+    return {
+        'foo': 'foo',
+        'bar': 'bar',
+        'baz': '',
+        'qux': '',
+    }
 
 
 @pytest.fixture
-def model():
-    return MyModel(foo='foo', bar='bar', baz='', qux='')
+def model(model_data):
+    return MyModel(**model_data)
 
 
 @pytest.fixture

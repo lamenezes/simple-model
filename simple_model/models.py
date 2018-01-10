@@ -1,34 +1,93 @@
-import inspect
+import typing
 from typing import Any, Iterable, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
 from .fields import ModelField
 
 
-class BaseModel(Iterable[Tuple[str, Any]]):
+class BaseModel(type):
     _field_class = ModelField
 
+    def __new__(cls, name, bases, attrs, **kwargs):
+        super_new = super().__new__
+
+        # do not perform initialization for Model class
+        # (only initialize Model subclasses)
+        parents = [base for base in bases if isinstance(base, BaseModel)]
+        if not parents:
+            return super_new(cls, name, bases, attrs)
+
+        new_class = super_new(cls, name, bases, attrs, **kwargs)
+        attr_meta = attrs.get('Meta')
+        meta = attr_meta if attr_meta else getattr(new_class, 'Meta', None)
+        if not meta:
+            meta = type('Meta', (), {})
+
+        hints = typing.get_type_hints(new_class)
+        try:
+            meta.fields = getattr(meta, 'fields')
+        except AttributeError:  # assume all fields are defined as typed class attributes
+            assert hints, ('Model must have a "fields" attribute on its Meta class or its fields '
+                           'defined as typed class attributes'.format(new_class.__name__))
+            meta.fields = tuple(hints)
+
+        meta.allow_empty = getattr(meta, 'allow_empty', tuple(meta.fields))
+
+        for field_name in meta.fields:
+            field_type = hints.get(field_name) if hints else None
+            default_value = getattr(new_class, field_name, None)
+            if isinstance(default_value, ModelField):
+                default_value = default_value.default_value
+            field = ModelField(
+                model_class=new_class,
+                name=field_name,
+                default_value=default_value,
+                type=field_type,
+                allow_empty=field_name in meta.allow_empty,
+            )
+            setattr(new_class, field_name, field)
+
+        new_class._meta = meta
+
+        return new_class
+
+
+class Model(metaclass=BaseModel):
     def __init__(self, **kwargs):
-        for field_name, field_value in kwargs.items():
+        for field_name in self._meta.fields:
+            descriptor = getattr(type(self), field_name)
+            field_value = kwargs.get(field_name, descriptor.default_value)
             setattr(self, field_name, field_value)
+
+        self.__post_init__(**kwargs)
+
+    def __post_init__(self, **kwargs):
+        pass
 
     def __eq__(self, other: Any) -> bool:
         try:
-            return dict(self) == dict(other)
+            return dict(self) == dict(other)  # type: ignore
         except (TypeError, ValueError):
             return False
 
     def __iter__(self) -> Iterator[Tuple[str, Any]]:
         self.clean()
 
-        for field in self._get_fields():
-            yield field.name, field.to_python()
+        for name, value, descriptor in self._get_fields():
+            yield name, descriptor.to_python(value)
 
     def __repr__(self) -> str:
         attrs = ', '.join(
-            '{field.name}={field.value!r}'.format(field=field) for field in self._get_fields()
+            '{name}={value!r}'.format(name=name, value=value) for name, value, _ in self._get_fields()
         )
         return '{class_name}({attrs})'.format(class_name=type(self).__name__, attrs=attrs)
+
+    def _get_fields(self) -> Iterator[Tuple[str, Any, ModelField]]:
+        cls = type(self)
+        return (
+            (field_name, getattr(self, field_name), getattr(cls, field_name))
+            for field_name in self._meta.fields  # type: ignore
+        )
 
     @classmethod
     def build_many(cls, source: Iterable) -> list:
@@ -42,14 +101,6 @@ class BaseModel(Iterable[Tuple[str, Any]]):
 
         return [cls(**item) for item in source]
 
-    def _get_fields(self) -> Iterator[ModelField]:
-        for field_name in self.get_fields():
-            field_value = getattr(self, field_name)
-            yield self._field_class(self, field_name, field_value)
-
-    def get_fields(self):
-        raise NotImplementedError()
-
     @staticmethod
     def is_empty(value: Any) -> bool:
         if value == 0 or value is False:
@@ -57,52 +108,17 @@ class BaseModel(Iterable[Tuple[str, Any]]):
         return not bool(value)
 
     def clean(self) -> None:
-        for field in self._get_fields():
-            field.clean()
-            setattr(self, field.name, field.value)
+        for name, value, descriptor in self._get_fields():
+            clean_value = descriptor.clean(self, value)
+            setattr(self, name, clean_value)
 
     def validate(self, raise_exception: bool=True) -> Union[None, bool]:
-        for field in self._get_fields():
+        for name, value, descriptor in self._get_fields():
             try:
-                field.validate()
+                descriptor.validate(self, value)
             except ValidationError:
                 if raise_exception:
                     raise
                 return False
 
         return None if raise_exception else True
-
-
-class DynamicModel(BaseModel):
-    def get_fields(self) -> Tuple[str, ...]:
-        return tuple(
-            name for name, value in inspect.getmembers(self)
-            if not(name.startswith('_') or inspect.ismethod(value) or inspect.isfunction(value))
-        )
-
-
-class Model(BaseModel):
-    fields = ()
-    allow_empty = ()
-
-    def __init__(self, **kwargs):
-        for field_name in self.get_fields():
-            field_value = kwargs.get(field_name, None)
-            setattr(self, field_name, field_value)
-
-    def _get_fields(self) -> Iterator[ModelField]:
-        fields = super()._get_fields()
-        allow_empty_fields = self.get_allow_empty()
-        for field in fields:
-            allow_empty = '__all__' in allow_empty_fields or field.name in allow_empty_fields
-            field.allow_empty = allow_empty
-            yield field
-
-    def get_fields(self) -> Tuple[str]:
-        assert self.fields, ('{} should include a fields attribute or override '
-                             'the get_fields method'.format(type(self).__name__))
-
-        return self.fields
-
-    def get_allow_empty(self) -> Tuple[str, ...]:
-        return self.allow_empty
