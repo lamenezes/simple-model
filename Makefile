@@ -1,6 +1,6 @@
 .PHONY: docs
 
-clean: clean-eggs clean-build
+clean: clean-eggs clean-build clean-docs
 	@find . -iname '*.pyc' -delete
 	@find . -iname '*.pyo' -delete
 	@find . -iname '*~' -delete
@@ -15,6 +15,9 @@ clean-build:
 	@rm -fr build/
 	@rm -fr dist/
 	@rm -fr *.egg-info
+
+clean-docs:
+	@rm -fr docs/build/
 
 docs:
 	cd docs && make html
