@@ -2,7 +2,7 @@
 Changes
 =======
 
-UNRELEASED (1.0.0)
+1.0.0 / 2018-01-10
 ==================
 
 * Move model field customization to Meta class inside model
