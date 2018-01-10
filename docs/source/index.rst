@@ -1,4 +1,5 @@
-simple model: handle your data easily
+=====================================
+simple model: data handling made easy
 =====================================
 
 simple model offers a simple way to work with data. It is very common to use
@@ -8,7 +9,7 @@ building larger applications.
 It allows you to easily define models using classes and perform common tasks
 such as data cleaning, validation, type conversion and much more.
 
-simple model has simple objectives:
+this lib has simple objectives:
 
 * Define models easily (support type hints)
 * Perform validation, cleaning, default values and type conversion
@@ -37,23 +38,31 @@ To define your models is as simple as stated in the following example:
 
 
     class Person(Model):
-        fields = ('name', 'age', 'height', 'weight')
-        allow_empty = ('height', 'weight')
+        age: int
+        height: float
+        name: str
+        weight: float
 
-        def validate_age(self, value):
-            if 0 > value > 150:
-                raise ValidationError
+        class Meta:
+            allow_empty = ('height', 'weight')
 
-        def validate_height(self, value):
-            if value <= 0:
-                raise ValidationError
+        def clean_name(self, name):
+            return name.strip()
+
+        def validate_age(self, age):
+            if 0 > age > 150:
+                raise ValidationError('Invalid value for age "{!r}"'.format(age))
+
+        def validate_height(self, height):
+            if height <= 0:
+                raise ValidationError('Invalid value for height "{!r}"'.format(age))
 
 
-    >> person = Person(name='John Doe', age=18)
-    >> person.name
+    >>> person = Person(name='John Doe', age=18)
+    >>> person.name
     'John Doe'
-    >> person.validate()
-    >> dict(person)
+    >>> person.validate()
+    >>> dict(person)
     {'name': 'John Doe', 'age': 18, 'height': '', 'weight': ''}
 
 
@@ -66,8 +75,5 @@ More Docs
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   more
