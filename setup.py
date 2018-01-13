@@ -8,7 +8,7 @@ from setuptools import setup, find_packages, Command
 
 here = Path.cwd()
 with open(here / 'README.rst') as f:
-    readme = f.read()
+    readme = '\n' + f.read()
 
 with open(here / 'CHANGES.rst') as f:
     changes = f.read()

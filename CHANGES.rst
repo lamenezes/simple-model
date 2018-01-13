@@ -2,6 +2,12 @@
 Changes
 =======
 
+UNRELEASED
+==========
+
+* Fix ``setup.py`` ``long_description``
+
+
 1.0.2 / 2018-01-10
 ==================
 
