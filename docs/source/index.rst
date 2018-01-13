@@ -50,7 +50,7 @@ To define your models is as simple as stated in the following example:
             return name.strip()
 
         def validate_age(self, age):
-            if 0 > age > 150:
+            if age < 0 or age > 150:
                 raise ValidationError('Invalid value for age "{!r}"'.format(age))
 
         def validate_height(self, height):
