@@ -26,9 +26,7 @@ class TypedModelMeta:
         'model',
         'models',
     )
-    allow_empty = (
-        'empty',
-    )
+    allow_empty = ('empty',)
 
 
 class TypedModel(Model):
@@ -39,6 +37,12 @@ class TypedModel(Model):
     models = typing.List[FooBarModel]
 
     Meta = TypedModelMeta
+
+
+class TypelessModel(Model):
+    boolean = True
+    number = 1.0
+    string = 'foobar'
 
 
 @pytest.fixture
@@ -438,9 +442,7 @@ def test_model_inheritance_with_meta_fields():
                 'string',
                 'sub',
             )
-            allow_empty = (
-                'empty',
-            )
+            allow_empty = ('empty',)
 
     model = SubTypedModel(
         common='common',
@@ -511,3 +513,10 @@ def test_model_inheritance_meta_inheritance():
     model.validate()
     assert model.baz
     assert model.qux
+
+
+def test_typeless_model():
+    model = TypelessModel()
+    assert model.boolean
+    assert model.number
+    assert model.string
