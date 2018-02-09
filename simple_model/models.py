@@ -33,7 +33,9 @@ class BaseModel(type):
         except AttributeError:  # assume all fields are defined as class attributes
             assert hints or attrs, ('Model must have a "fields" attribute on its Meta class or its '
                                     'fields defined as class attributes'.format(new_class.__name__))
-            meta.fields = tuple(set(hints) | attrs)
+            fields = set(hints) | attrs
+            fields.discard('Meta')
+            meta.fields = tuple(fields)
 
         meta.allow_empty = getattr(meta, 'allow_empty', tuple(meta.fields))
 
