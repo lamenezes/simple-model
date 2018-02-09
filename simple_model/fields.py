@@ -23,32 +23,33 @@ class ModelField:
         except AttributeError:
             self._clean = None
 
-    def convert_to_type(self, instance, value):
-        if not self.type or self.type is Any:
+    def convert_to_type(self, instance, value, type=None):
+        type = type or self.type
+        if not type or type is Any:
             return value
 
-        if not issubclass(self.type, PARAMETRIZED_GENERICS) and isinstance(value, self.type):
+        if not issubclass(type, PARAMETRIZED_GENERICS) and isinstance(value, type):
             return value
 
         from simple_model.models import Model
-        if issubclass(self.type, Model):
-            return self.type(**value)
+        if issubclass(type, Model):
+            return type(**value)
 
-        if issubclass(self.type, (list, tuple)):
-            element_type = self.type.__args__[0] if self.type.__args__ else None
+        if issubclass(type, (list, tuple)):
+            element_type = type.__args__[0] if type.__args__ else None
             if not element_type:
                 return value
 
             values = []
             for elem in value:
                 if not isinstance(elem, element_type):
-                    elem = element_type(elem)
+                    elem = self.convert_to_type(instance, elem, type=element_type)
                 values.append(elem)
 
-            iterable_type = tuple if issubclass(self.type, tuple) else list
+            iterable_type = tuple if issubclass(type, tuple) else list
             return iterable_type(values)
 
-        return self.type(value)
+        return type(value)
 
     def clean(self, instance, value):
         value = self.convert_to_type(instance, value)

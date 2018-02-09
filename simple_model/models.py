@@ -12,7 +12,7 @@ class BaseModel(type):
         super_new = super().__new__
 
         # do not perform initialization for Model class
-        # (only initialize Model subclasses)
+        # only initialize Model subclasses
         parents = [base for base in bases if isinstance(base, BaseModel)]
         if not parents:
             return super_new(cls, name, bases, attrs)
@@ -30,7 +30,7 @@ class BaseModel(type):
         hints = typing.get_type_hints(new_class)
         try:
             meta.fields = getattr(meta, 'fields')
-        except AttributeError:  # assume all fields are defined as typed class attributes
+        except AttributeError:  # assume all fields are defined as class attributes
             assert hints or attrs, ('Model must have a "fields" attribute on its Meta class or its '
                                     'fields defined as class attributes'.format(new_class.__name__))
             meta.fields = tuple(set(hints) | attrs)

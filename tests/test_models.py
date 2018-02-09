@@ -1,8 +1,8 @@
 import pytest
 import typing
 
-from simple_model.exceptions import EmptyField, ValidationError
 from simple_model import Model
+from simple_model.exceptions import EmptyField, ValidationError
 from simple_model.fields import ModelField
 
 from .conftest import MyModel
@@ -34,7 +34,7 @@ class TypedModel(Model):
     number: float  # type constraint
     string: str = 'foobar'  # type constraint + default
     model: FooBarModel
-    models = typing.List[FooBarModel]
+    models: typing.List[FooBarModel]
 
     Meta = TypedModelMeta
 
@@ -418,11 +418,12 @@ def test_typed_model_clean_type_conversion(
 
     typed_model.clean()
 
-    assert typed_model.number == 6.9
-    assert typed_model.string == '6.9'
-    assert typed_model.common == 'common'
-    assert typed_model.model == model_clean_validate_foo
-    assert typed_model.models == [model_clean_validate_foo] * 2
+    assert isinstance(typed_model.number, float)
+    assert isinstance(typed_model.string, str)
+    assert isinstance(typed_model.model, Model)
+    assert isinstance(typed_model.models, list)
+    for model in typed_model.models:
+        assert isinstance(model, Model)
 
 
 def test_model_inheritance_with_meta_fields():

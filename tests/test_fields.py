@@ -145,7 +145,7 @@ def test_model_field_clean_type_conversion(model):
         any=Foo('toba'),
         iterable=list(iterable),
         model={'foo': 'foo', 'bar': 'bar'},
-        models=[model],
+        models=[{'foo': 'foo', 'bar': 'bar'}],
         number='10',
         numbers=list(iterable),
         string=1,
