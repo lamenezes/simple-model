@@ -34,7 +34,7 @@ frameworks that does a lot of cool stuff.
 
 
 How to install
---------------
+==============
 
 .. code:: shell
 
@@ -42,7 +42,7 @@ How to install
 
 
 How to use
-----------
+==========
 
 .. code:: python
 
@@ -92,7 +92,7 @@ How to use
 
 
 Validation
-----------
+==========
 
 Model values aren't validated until the `validated` method is called:
 
@@ -120,7 +120,7 @@ exception:
 
 
 Cleaning
---------
+========
 
 Sometimes it is necessary to clean some values of your models, this can be
 easily done using simple-model:
@@ -144,7 +144,7 @@ easily done using simple-model:
 
 
 Build many models
------------------
+=================
 
 It's possible to build many models in a single step, it can be done by passing an iterable
 to the `build_many` method.
@@ -159,7 +159,7 @@ to the `build_many` method.
 
 
 Conversion to Dict
-------------------
+==================
 
 To convert to dict is pretty straight-forward task:
 
