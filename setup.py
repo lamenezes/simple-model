@@ -11,7 +11,7 @@ with open(here / 'README.rst') as f:
     readme = '\n' + f.read()
 
 with open(here / 'CHANGES.rst') as f:
-    changes = f.read()
+    changes = '\n' + f.read()
     version_match = re.search(r'\n(\d+.\d+.\d+) /', changes)
     version = version_match.groups()[0]
 
@@ -57,7 +57,7 @@ setup(
     name='pysimplemodel',
     version=version,
     description='Data handling made easy',
-    long_description='\n' + '\n'.join([readme, changes]),
+    long_description=readme + changes,
     url='https://github.com/lamenezes/simple-model',
     author='Luiz Menezes',
     author_email='luiz.menezesf@gmail.com',
