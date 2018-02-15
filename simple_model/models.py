@@ -65,7 +65,7 @@ class Model(metaclass=BaseModel):
             field_value = kwargs.get(field_name)
             default = descriptor.default_value
             factory = default if isinstance(default, Callable) else None
-            field_value = factory() if factory else kwargs.get(field_name, default)
+            field_value = factory() if factory and not field_value else kwargs.get(field_name, default)
             setattr(self, field_name, field_value)
 
         self.__post_init__(**kwargs)

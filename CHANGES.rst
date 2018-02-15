@@ -6,6 +6,12 @@ UNRELEASED
 ==========
 
 
+1.1.1 / 2018-15-02
+==================
+
+* Fix attribute default value as function so when the model receives the field value the default value is ignored
+
+
 1.1.0 / 2018-15-02
 ==================
 

@@ -536,8 +536,8 @@ def test_typeless_model():
 
 
 def test_field_factory_model():
-    model = FactoryFieldModel()
+    model = FactoryFieldModel(number=6.9)
 
     assert model.now == now()
-    assert model.number == float()
+    assert model.number == 6.9
     assert model.string == 'foobar'
