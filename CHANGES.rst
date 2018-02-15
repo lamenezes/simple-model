@@ -9,6 +9,8 @@ UNRELEASED
 * Allow models fields be defined with class attributes without typing
 * Fix type conversion on fields using ``typing.List[...]``
 * Bugfix: remove ``Meta`` attribute from model class meta fields
+* Fields attributes may receive function as default values. The function is executed
+  (without passing arguments to it) on model instantiation
 
 
 1.0.2 / 2018-01-10

@@ -1,5 +1,6 @@
 import pytest
 import typing
+from datetime import datetime
 
 from simple_model import Model
 from simple_model.exceptions import EmptyField, ValidationError
@@ -42,6 +43,16 @@ class TypedModel(Model):
 class TypelessModel(Model):
     boolean = True
     number = 1.0
+    string = 'foobar'
+
+
+def now():
+    return datetime(2019, 6, 9)
+
+
+class FactoryFieldModel(Model):
+    now = now
+    number = float
     string = 'foobar'
 
 
@@ -482,8 +493,8 @@ def test_model_inheritance_without_meta_fields():
         baz='baz',
         qux='qux',
     )
-
     model.clean()
+
     assert model.bar
     assert model.baz
     assert model.qux
@@ -510,14 +521,23 @@ def test_model_inheritance_meta_inheritance():
         baz='baz',
         qux='qux',
     )
-
     model.validate()
+
     assert model.baz
     assert model.qux
 
 
 def test_typeless_model():
     model = TypelessModel()
+
     assert model.boolean
     assert model.number
     assert model.string
+
+
+def test_field_factory_model():
+    model = FactoryFieldModel()
+
+    assert model.now == now()
+    assert model.number == float()
+    assert model.string == 'foobar'

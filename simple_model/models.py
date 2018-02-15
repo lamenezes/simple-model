@@ -1,5 +1,5 @@
 import typing
-from typing import Any, Iterable, Iterator, Tuple, Union
+from typing import Any, Callable, Iterable, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
 from .fields import ModelField
@@ -62,7 +62,10 @@ class Model(metaclass=BaseModel):
     def __init__(self, **kwargs):
         for field_name in self._meta.fields:
             descriptor = getattr(type(self), field_name)
-            field_value = kwargs.get(field_name, descriptor.default_value)
+            field_value = kwargs.get(field_name)
+            default = descriptor.default_value
+            factory = default if isinstance(default, Callable) else None
+            field_value = factory() if factory else kwargs.get(field_name, default)
             setattr(self, field_name, field_value)
 
         self.__post_init__(**kwargs)
