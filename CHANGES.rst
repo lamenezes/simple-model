@@ -5,6 +5,10 @@ Changes
 UNRELEASED
 ==========
 
+
+1.1.0 / 2018-15-02
+==================
+
 * Fix ``setup.py`` ``long_description``
 * Allow models fields be defined with class attributes without typing
 * Fix type conversion on fields using ``typing.List[...]``

@@ -56,8 +56,8 @@ class UploadCommand(Command):
 setup(
     name='pysimplemodel',
     version=version,
-    description='Simple Models for Python',
-    long_description='\n'.join([readme, changes]),
+    description='Data handling made easy',
+    long_description='\n' + '\n'.join([readme, changes]),
     url='https://github.com/lamenezes/simple-model',
     author='Luiz Menezes',
     author_email='luiz.menezesf@gmail.com',
