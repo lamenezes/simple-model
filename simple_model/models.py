@@ -3,6 +3,7 @@ from typing import Any, Callable, Iterable, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
 from .fields import ModelField
+from .utils import is_not_special_object
 
 
 class BaseModel(type):
@@ -24,8 +25,8 @@ class BaseModel(type):
             meta = type('Meta', (), {})
 
         attrs = set(
-            k for k in new_class.__dict__
-            if not (k[:2] == '__' and k[-2:] == '__')
+            k for k, v in new_class.__dict__.items()
+            if not (k[:2] == '__' and k[-2:] == '__') and is_not_special_object(v)
         )
         hints = typing.get_type_hints(new_class)
         try:

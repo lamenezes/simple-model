@@ -51,8 +51,8 @@ def now():
 
 
 class FactoryFieldModel(Model):
-    now = now
-    number = float
+    now: datetime = now
+    number: float = float
     string = 'foobar'
 
 
