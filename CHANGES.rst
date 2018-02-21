@@ -5,6 +5,8 @@ Changes
 UNRELEASED
 ==========
 
+* Fix field conversion to only happen when value is not None
+
 
 1.1.1 / 2018-15-02
 ==================

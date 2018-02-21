@@ -25,7 +25,7 @@ class ModelField:
 
     def convert_to_type(self, instance, value, type=None):
         type = type or self.type
-        if not type or type is Any:
+        if not type or type is Any or value is None:
             return value
 
         if not issubclass(type, PARAMETRIZED_GENERICS) and isinstance(value, type):

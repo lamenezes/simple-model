@@ -135,6 +135,12 @@ def test_model_field_clean_type_conversion(model):
         numbers: List[float]
         string: str
         strings: Tuple[str]
+        string_none: str
+
+        class Meta:
+            allow_empty = (
+                'string_none',
+            )
 
     class Foo:
         def __init__(self, foo):
@@ -168,3 +174,4 @@ def test_model_field_clean_type_conversion(model):
     assert isinstance(model.strings, tuple)
     for elem in model.strings:
         assert isinstance(elem, TypedModel.strings.type.__args__[0])
+    assert model.string_none is None
