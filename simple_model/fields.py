@@ -23,33 +23,37 @@ class ModelField:
         except AttributeError:
             self._clean = None
 
-    def convert_to_type(self, instance, value, type=None):
-        type = type or self.type
-        if not type or type is Any or value is None:
+    def convert_to_type(self, instance, value, field_type=None):
+        field_type = field_type or self.type
+        if not field_type or field_type is Any or value is None:
             return value
 
-        if not issubclass(type, PARAMETRIZED_GENERICS) and isinstance(value, type):
+        if not issubclass(field_type, PARAMETRIZED_GENERICS) and isinstance(value, field_type):
             return value
 
         from simple_model.models import Model
-        if issubclass(type, Model):
-            return type(**value)
+        if issubclass(field_type, Model) and isinstance(value, Model):
+            assert isinstance(value, field_type), ('Field of type {} received an object of invalid '
+                                                   'type {}').format(field_type, type(value))
 
-        if issubclass(type, (list, tuple)):
-            element_type = type.__args__[0] if type.__args__ else None
-            if not element_type:
+        if issubclass(field_type, Model):
+            return field_type(**value)
+
+        if issubclass(field_type, (list, tuple)):
+            element_field_type = field_type.__args__[0] if field_type.__args__ else None
+            if not element_field_type:
                 return value
 
             values = []
             for elem in value:
-                if not isinstance(elem, element_type):
-                    elem = self.convert_to_type(instance, elem, type=element_type)
+                if not isinstance(elem, element_field_type):
+                    elem = self.convert_to_type(instance, elem, field_type=element_field_type)
                 values.append(elem)
 
-            iterable_type = tuple if issubclass(type, tuple) else list
-            return iterable_type(values)
+            iterable_field_type = tuple if issubclass(field_type, tuple) else list
+            return iterable_field_type(values)
 
-        return type(value)
+        return field_type(value)
 
     def clean(self, instance, value):
         value = self.convert_to_type(instance, value)

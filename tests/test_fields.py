@@ -1,3 +1,4 @@
+from typing import Any, List, Tuple
 from unittest import mock
 
 import pytest
@@ -124,12 +125,12 @@ def test_model_field_clean_nested(model):
 
 def test_model_field_clean_type_conversion(model):
     OtherModel = type(model)
-    from typing import Any, List, Tuple
 
     class TypedModel(Model):
         any: Any
         iterable: List
         model: OtherModel
+        model_as_dict: OtherModel
         models: List[OtherModel]
         number: float
         numbers: List[float]
@@ -146,12 +147,14 @@ def test_model_field_clean_type_conversion(model):
         def __init__(self, foo):
             pass
 
+    model_data = {'foo': 'foo', 'bar': 'bar'}
     iterable = ['1', 2, '3']
     model = TypedModel(
         any=Foo('toba'),
         iterable=list(iterable),
-        model={'foo': 'foo', 'bar': 'bar'},
-        models=[{'foo': 'foo', 'bar': 'bar'}],
+        model=OtherModel(**model_data),
+        model_as_dict=model_data,
+        models=[model_data],
         number='10',
         numbers=list(iterable),
         string=1,
@@ -175,3 +178,15 @@ def test_model_field_clean_type_conversion(model):
     for elem in model.strings:
         assert isinstance(elem, TypedModel.strings.type.__args__[0])
     assert model.string_none is None
+
+
+def test_field_conversion_model_type_conflict(model):
+    OtherModel = type(model)
+
+    class MyModel(Model):
+        field: OtherModel
+
+    my_model = MyModel(field=model)
+    invalid_model = MyModel(field=my_model)
+    with pytest.raises(AssertionError):
+        invalid_model.clean()
