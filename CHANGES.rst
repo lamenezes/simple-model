@@ -5,6 +5,10 @@ Changes
 UNRELEASED
 ==========
 
+
+1.1.2 / 2018-21-02
+==================
+
 * Fix field conversion to only happen when value is not None
 * Raise exception when trying to convert field with invalid model type
 * Fix model fields to stop including some methods and properties

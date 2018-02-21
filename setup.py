@@ -57,7 +57,7 @@ setup(
     name='pysimplemodel',
     version=version,
     description='Data handling made easy',
-    long_description=readme + changes,
+    long_description='\n' + readme + changes,
     url='https://github.com/lamenezes/simple-model',
     author='Luiz Menezes',
     author_email='luiz.menezesf@gmail.com',
