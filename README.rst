@@ -23,211 +23,187 @@ plenty of lists and dicts.
 
 It has simple objectives:
 
-- Define your fields easily (just a tuple, nor dicts or instances of type classes whatever)
-- Support for field validation
-- Conversion to dict
-
-That's it. If you want something more complex there are plenty of libraries and
-frameworks that does a lot of cool stuff.
-
-.. contents:: **Table of Contents**
+- Define models and its fields easily using class attributes, type annotations or tuples (whatever suits your needs)
+- Support for field validation, cleaning and type conversion
+- Easy model conversion to dict
 
 
-How to install
-==============
+Quickstart
+==========
+
+Installing
+----------
+
+Open your favorite shell and run the following command:
 
 .. code:: shell
 
     pip install pysimplemodel
 
 
-How to use
-==========
+Example
+-------
+
+Define your models using type annotations:
 
 .. code:: python
 
     from simple_model import Model
-    from simple_model.exceptions import ValidationError
 
 
     class Person(Model):
         age: int
         height: float
+        is_active: bool = True
         name: str
-        weight: float
+
+
+Simple model automatically creates an initializer for your model and you all set
+to create instances:
+
+.. code:: python
+
+    >> person = Person(age=18, height=1.67, name='John Doe')
+    >> person.name
+    'John Doe'
+
+As you have noticed we haven't informed a value for field `is_active`, but the model
+was still created. That's becaused we've set a default value of `True` for it and
+the model takes care of assinging it automatically to the field:
+
+.. code:: python
+
+    >> person.is_active
+    True
+
+
+Simple model also offers model validation. Empty fields are considered invalid and will
+raise errors upon validation. Let's perform some tests using the previous `Person` model:
+
+.. code:: python
+
+    >> person = Person()
+    >> print(person.name)
+    None
+    >> person.validate()
+    Traceback (most recent call last):
+        ...
+    EmptyField: 'height' field cannot be empty
+
+Let's say we want the height and age fields to be optional, that can be achieved with
+the following piece of code:
+
+.. code:: python
+
+    from simple_model import Model
+
+
+    class Person(Model):
+        age: int
+        height: float
+        is_active: bool = True
+        name: str
 
         class Meta:
-            allow_empty = ('height', 'weight')
+            allow_empty = ('age', 'height')
 
-        def clean_name(self, name):
-            return name.strip()
+
+Now let's test it:
+
+.. code:: python
+
+    >> person = Person(name='Jane Doe', is_active=False)
+    >> person.is_active
+    False
+    >> person.validate()
+
+The last line won't raise an exception which means the model instance is valid!
+In case you need the validation to return True or False instead of raising an
+exception that's possible by doing the following:
+
+.. code:: python
+
+    >> person.validate(raise_exception=False)
+    True
+
+
+You can also add custom validations by writing class methods prefixed by `validate`
+followed by the attribute name, e.g.
+
+.. code:: python
+
+    class Person:
+        age: int
+        height: float
+        name: str
 
         def validate_age(self, age):
             if age < 0 or age > 150:
-                raise ValidationError('Invalid value for age "{!r}"'.format(age))
+                raise ValidationError('Invalid value for age {!r}'.format(age))
 
         def validate_height(self, height):
             if height <= 0:
-                raise ValidationError('Invalid value for height "{!r}"'.format(age))
+               raise ValidationError('Invalid value for height {!r}'.format(age))
+
+
+Let's test it:
 
 .. code:: python
 
-    >>> person = Person(age=18.0, name='John Doe ')
-    >>> person.name
-    'John Doe '
-    >>> person.clean()
-    >>> person.name
-    'John Doe'
-    >>> person.age
-    18
-    >>> person.validate(raise_exception=False)
-    True
-    >>> dict(person)
-    {
-        'age': 18,
-        'height': '',
-        'name': 'John Doe',
-        'weight': '',
-    }
+    >> person = Person(name='John Doe', age=190)
+    >> person.validate()
+    Traceback (most recent call last):
+        ...
+    ValidationError: Invalid value for age 190
+    >> other_person = Person(name='Jane Doe', height=-1.67)
+    >> other_person.validate()
+    Traceback (most recent call last):
+        ...
+    ValidationError: Invalid value for height -1.67
 
 
-Validation
-==========
+It is important to note that models don't validate types. Currently types are used
+for field value conversion. This is going to be explained later.
 
-Model values aren't validated until the `validated` method is called:
+Simple model also supports cleaning the field values by defining custom methods
+named `clean_` followed by the attribute name:
 
 .. code:: python
 
-    >>> person = Person()  # no exception
-    >>> person.validate()
-    ...
-    EmptyField: name field cannot be empty
-    >>> person = Person(name='Jane Doe', age=60)
-    >>> person.validate()  # now it's ok!
-
-
-You may change the validate method to return a boolean instead of raising an
-exception:
-
-.. code:: python
-
-    >>> person = Person()
-    >>> person.validate(raise_exception=False)
-    False
-    >>> person = Person(name='Jane Doe', age=60)
-    >>> person.validate(raise_exception=False)
-    True
-
-
-Cleaning
-========
-
-Sometimes it is necessary to clean some values of your models, this can be
-easily done using simple-model:
-
-.. code:: python
-
-    class CleanPerson(Model):
+    class Person:
         age: int
         name: str
 
         def clean_name(self, name):
             return name.strip()
 
-
-    >>> person = CleanPerson(name='John Doe  \n', age='10')
-    >>> person.name, person.age
-    ('John Doe  \n', '10')
+    >>> person = Person(age=18.0, name='John Doe ')
+    >>> person.name
+    'John Doe '
+    >> person.age
+    18.0
     >>> person.clean()
-    >>> person.name, person.age
-    ('John Doe', 10)
+    >>> person.name
+    'John Doe'
+    >>> person.age  # all attributes are converted to its type before cleaning
+    18  # converted from float (18.0) to int (18)
 
 
-Build many models
-=================
-
-It's possible to build many models in a single step, it can be done by passing an iterable
-to the `build_many` method.
-
-.. code:: python
-
-    >>> people = [
-        {'name': 'John Doe'},
-        {'name': 'John Doe II'},
-    ]
-    >>> models = Person.build_many(people)
-
-
-Conversion to Dict
-==================
-
-To convert to dict is pretty straight-forward task:
+Finally, simple model allows you to easily convert your model to dict type using python
+built-in function `dict()`:
 
 .. code:: python
 
-    >>> person = Person(name='Jane Doe', age=60)
     >>> dict(person)
     {
-        'age': 60,
-        'height': None,
-        'name': 'Jane Doe',
-        'weight': None,
+        'age': 18,
+        'name': 'John Doe'
     }
 
 
-Simple model also supports dict conversion of nested models:
+Documentation
+=============
 
-.. code:: python
+Docs on simple-model.rtfd.io_
 
-    class SocialPerson(Model):
-        friend: Person
-        name: str
-
-
-    >>> person = Person(name='Jane Doe', age=60)
-    >>> other_person = SocialPerson(name='John Doe', friend=person)
-    >>> dict(other_person)
-    {
-        'friend': {
-            'age': 60,
-            'height': None,
-            'name': 'Jane Doe',
-            'weight': None,
-        },
-        'name': 'John Doe',
-    }
-
-
-It also supports nested models as lists:
-
-.. code:: python
-
-    import typing
-
-
-    class MoreSocialPerson(Model):
-        friends: typing.List[Friend]
-        name: str
-
-
-    >>> person = Person(name='Jane Doe', age=60)
-    >>> other_person = Person(name='John Doe', age=15)
-    >>> social_person = MoreSocialPerson(name='Foo Bar', friends=[person, other_person])
-    >>> dict(social_person)
-    {
-        'name': 'Foo Bar',
-        'friends': [
-            {
-                'age': 60,
-                'height': None,
-                'name': 'Jane Doe',
-                'weight': None,
-            },
-            {
-                'age': 15,
-                'height': None,
-                'name': 'John Doe',
-                'weight': None,
-            }
-        ]
-    }
+.. _simple-model.rtfd.io: https://simple-model.readthedocs.io/en/latest/
