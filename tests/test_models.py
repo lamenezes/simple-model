@@ -78,6 +78,11 @@ def nested_model():
                 'qux',
             )
 
+            allow_empty = (
+                'baz',
+                'qux',
+            )
+
         def validate_foo(self, value):
             if len(value) != 3:
                 raise ValidationError()
@@ -367,6 +372,11 @@ def test_model_iter_clean(model):
             fields = (
                 'foo',
                 'bar',
+                'baz',
+                'qux',
+            )
+
+            allow_empty = (
                 'baz',
                 'qux',
             )

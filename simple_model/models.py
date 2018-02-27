@@ -38,7 +38,7 @@ class BaseModel(type):
             fields.discard('Meta')
             meta.fields = tuple(fields)
 
-        meta.allow_empty = getattr(meta, 'allow_empty', tuple(meta.fields))
+        meta.allow_empty = getattr(meta, 'allow_empty', tuple())
 
         for field_name in meta.fields:
             field_type = hints.get(field_name) if hints else None
