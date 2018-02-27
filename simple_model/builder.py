@@ -60,6 +60,9 @@ def model_many_builder(
     snake_case_keys: bool=True, alpha_keys: bool=True,
 ) -> List[Model]:
 
+    if len(data) == 0:
+        return []
+
     first = data[0]
     cls = model_class_builder(class_name, first)
     models = []

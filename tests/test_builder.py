@@ -133,3 +133,10 @@ def test_model_many_builder():
     first = models[0]
     for model in models[1:]:
         assert isinstance(model, type(first))
+
+
+@pytest.mark.parametrize('iterable', ([], ()))
+def test_model_many_builder_empty_iterable(iterable):
+    models = model_many_builder(iterable)
+    assert isinstance(models, list)
+    assert models == []

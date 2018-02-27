@@ -2,8 +2,10 @@
 Changes
 =======
 
-UNRELEASED
-==========
+1.1.3 / 2018-27-02
+==================
+
+* Fix ``model_many_builder`` to stop raising errors when empty iterable is received as argument
 
 
 1.1.2 / 2018-21-02
