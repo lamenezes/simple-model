@@ -81,26 +81,10 @@ def test_model_field_clean(model_field):
     assert model_field.clean(None, ' foo ') == 'foo'
 
 
-def test_model_field_clean_invalid(model, model_field):
-    model_field._clean = lambda _, s: s.strip()
-    model_field._validate = type(model).validate_foo
-
-    with pytest.raises(ValidationError):
-        model_field.clean(None, ' fo ')
-
-
 def test_model_field_clean_without_clean_method(model_field):
     model_field._clean = None
 
     assert model_field.clean(None, ' foo ') == ' foo '
-
-
-def test_model_field_clean_without_clean_method_invalid(model, model_field):
-    model_field._clean = None
-    model_field._validate = model_field.model_class.validate_foo
-
-    with pytest.raises(ValidationError):
-        model_field.clean(None, ' fo ')
 
 
 def test_model_field_clean_nested(model):

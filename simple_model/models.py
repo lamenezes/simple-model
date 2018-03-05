@@ -122,6 +122,8 @@ class Model(metaclass=BaseModel):
             clean_value = descriptor.clean(self, value)
             setattr(self, name, clean_value)
 
+        self.validate()
+
     def validate(self, raise_exception: bool=True) -> Union[None, bool]:
         for name, value, descriptor in self._get_fields():
             try:

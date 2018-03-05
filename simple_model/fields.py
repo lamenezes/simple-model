@@ -64,7 +64,6 @@ class ModelField:
         except AttributeError:
             pass
 
-        self.validate(instance, value)
         return clean_value
 
     def validate(self, instance, value):

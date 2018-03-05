@@ -1,6 +1,7 @@
 import pytest
 import typing
 from datetime import datetime
+from unittest import mock
 
 from simple_model import Model
 from simple_model.exceptions import EmptyField, ValidationError
@@ -541,3 +542,20 @@ def test_field_factory_model():
     assert model.now == now()
     assert model.number == 6.9
     assert model.string == 'foobar'
+
+
+def test_model_clean_invalid_mocked_model(model):
+    model.validate = mock.Mock(side_effect=ValidationError)
+
+    with pytest.raises(ValidationError):
+        model.clean()
+
+
+def test_model_clean_invalid_model_validate_called_after_clean(model):
+    class MyModel(type(model)):
+        def clean_foo(self, foo):
+            self.foo = foo.strip()
+
+    model = MyModel(foo='fo ', bar='bar')
+    with pytest.raises(ValidationError):
+        model.clean()
