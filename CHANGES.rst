@@ -2,6 +2,11 @@
 Changes
 =======
 
+1.1.4 / 2018-05-03
+==================
+
+* Fix ``Model.clean()``: call model validate after model cleaning instead of field validate after field cleaning
+
 1.1.3 / 2018-27-02
 ==================
 
