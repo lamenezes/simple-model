@@ -117,7 +117,7 @@ class Model(metaclass=BaseModel):
             return False
         return not bool(value)
 
-    def clean(self) -> None:
+    def clean(self):
         for name, value, descriptor in self._get_fields():
             clean_value = descriptor.clean(self, value)
             setattr(self, name, clean_value)
