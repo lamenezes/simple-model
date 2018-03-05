@@ -25,3 +25,6 @@ docs:
 test:
 	pipenv run py.test tests/ --cov simple_model
 	pipenv run mypy simple_model
+
+release:
+	python setup.py upload
