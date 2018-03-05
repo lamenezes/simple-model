@@ -2,6 +2,11 @@
 Changes
 =======
 
+1.1.5 / 2018-05-03
+==================
+
+* Fix fields to be mandatory by default as designed / stated in docs
+
 1.1.4 / 2018-05-03
 ==================
 
