@@ -1,3 +1,5 @@
+import typing
+
 import pytest
 
 from simple_model.exceptions import ValidationError
@@ -5,9 +7,10 @@ from simple_model.models import Model
 
 
 class MyModel(Model):
-    class Meta:
-        fields = ('foo', 'bar', 'baz', 'qux')
-        allow_empty = ('baz', 'qux')
+    foo: str
+    bar: typing.Any
+    baz = None
+    qux = None
 
     def validate_foo(self, value):
         if len(value) != 3:

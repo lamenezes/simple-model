@@ -11,34 +11,21 @@ from .conftest import MyModel
 
 
 class FooBarModel(Model):
-    class Meta:
-        fields = ('foo', 'bar')
+    foo: str
+    bar: str
 
     def clean_foo(self, foo):
         return foo.strip()
 
 
-class TypedModelMeta:
-    fields = (
-        'common',  # common field (no default and no type constraint)
-        'empty',
-        'boolean',
-        'number',
-        'string',
-        'model',
-        'models',
-    )
-    allow_empty = ('empty',)
-
-
 class TypedModel(Model):
     boolean = True  # default
-    number: float  # type constraint
-    string: str = 'foobar'  # type constraint + default
+    common: typing.Any
+    empty = None
     model: FooBarModel
     models: typing.List[FooBarModel]
-
-    Meta = TypedModelMeta
+    number: float  # type constraint
+    string: str = 'foobar'  # type constraint + default
 
 
 class TypelessModel(Model):
@@ -70,18 +57,10 @@ def model_clean_validate_foo(model_clean_validate_foo_data):
 @pytest.fixture
 def nested_model():
     class CleanQuxModel(Model):
-        class Meta:
-            fields = (
-                'foo',
-                'bar',
-                'baz',
-                'qux',
-            )
-
-            allow_empty = (
-                'baz',
-                'qux',
-            )
+        foo: str
+        bar: str
+        baz: typing.Any = None
+        qux: str = ''
 
         def validate_foo(self, value):
             if len(value) != 3:
@@ -159,23 +138,10 @@ def test_base_model_clean(model_clean_validate_foo):
     assert model_clean_validate_foo.bar == 'bar'
 
 
-def test_base_model_validate_success(model):
-    model.get_fields = lambda: ('foo', 'bar')
-
-    def validate_foo(value):
-        if value != 'foo':
-            raise ValidationError()
-
-    model.validate_foo = validate_foo
-
-    assert model.validate(raise_exception=False) is True
-    assert model.validate() is None
-
-
 def test_base_model_validate_fail(model):
     class MyModel(type(model)):
-        class Meta:
-            fields = ('foo', 'bar')
+        foo: str
+        bar: str
 
         def validate_foo(self, value):
             if value != 'foo':
@@ -205,7 +171,6 @@ def test_base_model___eq___equals():
 
 def test_base_model___eq___not_equals(model):
     other_model = FooBarModel(foo='bar', bar='foo')
-    other_model.get_fields = model.get_fields = lambda: ('foo', 'bar')
 
     assert model != other_model
     assert model != {}
@@ -223,14 +188,6 @@ def test_model(model):
     assert 'foo' in repr(model)
     for k, v in model:
         assert k in model._meta.fields
-
-
-def test_model_fields_allow_empty():
-    model = MyModel(foo='foo', bar='bar')
-    assert model.foo == 'foo'
-    assert model.bar == 'bar'
-    assert model.baz is None
-    assert model.qux is None
 
 
 def test_model__get_fields(model):
@@ -335,17 +292,18 @@ def test_model_clean():
     fields = ('foo', 'bar', 'baz')
 
     class CleanyModel(Model):
-        class Meta:
-            fields = ('foo', 'bar', 'baz')
+        foo: str
+        bar: str
+        baz: str
 
-        def clean_foo(self, value):
-            return value.strip()
+        def clean_foo(self, foo):
+            return foo.strip()
 
-        def clean_bar(self, value):
-            return value.strip()
+        def clean_bar(self, bar):
+            return bar.strip()
 
-        def clean_baz(self, value):
-            return value.strip()
+        def clean_baz(self, baz):
+            return baz.strip()
 
     model = CleanyModel(
         foo=' foo ',
@@ -368,18 +326,10 @@ def test_model_clean_nested(nested_model):
 
 def test_model_iter_clean(model):
     class CleanBarMyModel(Model):
-        class Meta:
-            fields = (
-                'foo',
-                'bar',
-                'baz',
-                'qux',
-            )
-
-            allow_empty = (
-                'baz',
-                'qux',
-            )
+        foo: str
+        bar: str
+        baz = ''
+        qux = ''
 
         def clean_bar(self, value):
             return value.strip()
@@ -394,7 +344,7 @@ def test_model_get_fields_invalid():
     with pytest.raises(AssertionError) as exc:
         type('FieldlessModel', (Model,), {})
 
-    assert 'must have a "fields" attr' in str(exc)
+    assert 'model must define class attributes' in str(exc)
 
 
 def test_build_many(many_source):
@@ -413,11 +363,6 @@ def test_build_many_empty_iterable():
 def test_build_many_different_items():
     with pytest.raises(ValueError):
         MyModel.build_many([{'a': 1}, {'b': 2}])
-
-
-def test_typed_model_meta():
-    assert sorted(TypedModel._meta.fields) == sorted(TypedModelMeta.fields)
-    assert sorted(TypedModel._meta.allow_empty) == sorted(TypedModelMeta.allow_empty)
 
 
 def test_type_model(typed_model, model_clean_validate_foo):
@@ -448,24 +393,10 @@ def test_typed_model_clean_type_conversion(
         assert isinstance(model, Model)
 
 
-def test_model_inheritance_with_meta_fields():
+def test_model_inheritance_with_meta_fields(model_clean_validate_foo):
     class SubTypedModel(TypedModel):
         other_string: str
         sub: typing.Any = None
-
-        class Meta:
-            fields = (
-                'boolean',
-                'common',  # common field (no default and no type constraint)
-                'empty',
-                'model',
-                'models',
-                'number',
-                'other_string',
-                'string',
-                'sub',
-            )
-            allow_empty = ('empty',)
 
     model = SubTypedModel(
         common='common',
@@ -492,12 +423,10 @@ def test_model_inheritance_without_meta_fields():
         bar: str
 
     class SubModel(SuperModel):
+        foo: str = ''
         bar: int
         baz: str
         qux: str
-
-        class Meta:
-            allow_empty = ('foo',)
 
     model = SubModel(
         bar=10,
@@ -507,33 +436,6 @@ def test_model_inheritance_without_meta_fields():
     model.clean()
 
     assert model.bar
-    assert model.baz
-    assert model.qux
-
-
-def test_model_inheritance_meta_inheritance():
-    class SuperModel(Model):
-        foo: str
-        bar: str
-
-        class Meta:
-            fields = ('foo', 'bar')
-            allow_empty = ('foo', 'bar')
-
-    class SubModel(SuperModel):
-        bar: int
-        baz: str
-        qux: str
-
-        class Meta(SuperModel.Meta):
-            fields = ('foo', 'bar', 'baz', 'qux')
-
-    model = SubModel(
-        baz='baz',
-        qux='qux',
-    )
-    model.validate()
-
     assert model.baz
     assert model.qux
 
@@ -564,7 +466,7 @@ def test_model_clean_invalid_mocked_model(model):
 def test_model_clean_invalid_model_validate_called_after_clean(model):
     class MyModel(type(model)):
         def clean_foo(self, foo):
-            self.foo = foo.strip()
+            return foo.strip()
 
     model = MyModel(foo='fo ', bar='bar')
     with pytest.raises(ValidationError):

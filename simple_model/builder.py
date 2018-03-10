@@ -6,12 +6,9 @@ from .utils import camel_case, coerce_to_alpha, snake_case
 
 def model_class_builder(class_name: str, data: Any) -> type:
     keys = data.keys() or ('',)
-    attrs = {
-        'allow_empty': tuple(keys),
-        'fields': tuple(keys),
-    }
-    Meta = type('Meta', (), attrs)
-    new_class = type(class_name, (Model,), {'Meta': Meta})
+    attrs = {key: None for key in keys}
+    attrs['__annotations__'] = {key: Any for key in keys}
+    new_class = type(class_name, (Model,), attrs)
     return new_class
 
 

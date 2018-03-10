@@ -2,12 +2,30 @@ import typing
 from typing import Any, Callable, Iterable, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
-from .fields import ModelField
+from .fields import ModelField, Unset
 from .utils import is_not_special_object
 
 
 class BaseModel(type):
     _field_class = ModelField
+
+    @classmethod
+    def _get_class_attributes(cls, new_class, parents):
+        attrs = set(
+            k for k, v in new_class.__dict__.items()
+            if not (k[:2] == '__' and k[-2:] == '__') and is_not_special_object(v)
+        )
+
+        if not parents:
+            return attrs
+
+        return cls._get_class_attributes(parents[0], parents[1:]) | attrs
+
+    @classmethod
+    def _get_fields(cls, attrs, hints):
+        fields = set(hints) | attrs
+        fields.discard('Meta')
+        return tuple(fields)
 
     def __new__(cls, name, bases, attrs, **kwargs):
         super_new = super().__new__
@@ -19,30 +37,16 @@ class BaseModel(type):
             return super_new(cls, name, bases, attrs)
 
         new_class = super_new(cls, name, bases, attrs, **kwargs)
-        attr_meta = attrs.get('Meta')
-        meta = attr_meta if attr_meta else getattr(new_class, 'Meta', None)
-        if not meta:
-            meta = type('Meta', (), {})
+        meta = type('Meta', (), {})
 
-        attrs = set(
-            k for k, v in new_class.__dict__.items()
-            if not (k[:2] == '__' and k[-2:] == '__') and is_not_special_object(v)
-        )
         hints = typing.get_type_hints(new_class)
-        try:
-            meta.fields = getattr(meta, 'fields')
-        except AttributeError:  # assume all fields are defined as class attributes
-            assert hints or attrs, ('Model must have a "fields" attribute on its Meta class or its '
-                                    'fields defined as class attributes'.format(new_class.__name__))
-            fields = set(hints) | attrs
-            fields.discard('Meta')
-            meta.fields = tuple(fields)
-
-        meta.allow_empty = getattr(meta, 'allow_empty', tuple())
+        attrs = cls._get_class_attributes(new_class, parents)
+        assert hints or attrs, '{} model must define class attributes'.format(new_class.__name__)
+        meta.fields = cls._get_fields(attrs, hints)
 
         for field_name in meta.fields:
             field_type = hints.get(field_name) if hints else None
-            default_value = getattr(new_class, field_name, None)
+            default_value = getattr(new_class, field_name, Unset)
             if isinstance(default_value, ModelField):
                 default_value = default_value.default_value
             field = ModelField(
@@ -50,7 +54,6 @@ class BaseModel(type):
                 name=field_name,
                 default_value=default_value,
                 type=field_type,
-                allow_empty=field_name in meta.allow_empty,
             )
             setattr(new_class, field_name, field)
 

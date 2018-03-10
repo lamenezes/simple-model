@@ -4,14 +4,15 @@ from .exceptions import EmptyField
 
 PARAMETRIZED_GENERICS = (List, Tuple)
 
+Unset = type('Unset', (), {})
+
 
 class ModelField:
-    def __init__(self, model_class, name, default_value=None, type=None, allow_empty=False):
+    def __init__(self, model_class, name, default_value=Unset, type=None):
         self.model_class = model_class
         self.name = name
-        self.default_value = default_value
+        self._default_value = default_value
         self.type = type
-        self.allow_empty = allow_empty
 
         try:
             self._validate = getattr(model_class, 'validate_{}'.format(name))
@@ -22,6 +23,10 @@ class ModelField:
             self._clean = getattr(model_class, 'clean_{}'.format(name))
         except AttributeError:
             self._clean = None
+
+    @property
+    def default_value(self):
+        return self._default_value if self._default_value is not Unset else None
 
     def convert_to_type(self, instance, value, field_type=None):
         field_type = field_type or self.type
@@ -67,7 +72,7 @@ class ModelField:
         return clean_value
 
     def validate(self, instance, value):
-        if not self.allow_empty and self.model_class.is_empty(value):
+        if self._default_value is Unset and self.model_class.is_empty(value):
             raise EmptyField(self.name)
 
         if self._validate:

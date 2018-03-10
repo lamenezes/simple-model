@@ -16,7 +16,12 @@ class MyValidationError(ValidationError):
 
 @pytest.fixture
 def model_field():
-    return ModelField(MyModel, name='bar', default_value='default', type=str, allow_empty=True)
+    return ModelField(MyModel, name='bar', default_value='default', type=str)
+
+
+@pytest.fixture
+def empty_model_field():
+    return ModelField(MyModel, name='bar', type=str)
 
 
 def test_model_field(model_field):
@@ -24,7 +29,6 @@ def test_model_field(model_field):
     assert model_field.name == 'bar'
     assert model_field.default_value == 'default'
     assert issubclass(str, model_field.type)
-    assert model_field.allow_empty is True
 
 
 @pytest.mark.parametrize('value', (1, '1', [2], ['2']))
@@ -68,11 +72,10 @@ def test_model_field_validate_validation_error(model, model_field, exception):
 
 
 @pytest.mark.parametrize('blank_value', (None, '', [], {}, ()))
-def test_model_field_validate_empty_field(model_field, blank_value):
-    model_field.allow_empty = False
-    model_field.value = blank_value
+def test_model_field_validate_empty_field(empty_model_field, blank_value):
+    empty_model_field.value = blank_value
     with pytest.raises(EmptyField):
-        model_field.validate(None, None)
+        empty_model_field.validate(None, None)
 
 
 def test_model_field_clean(model_field):
@@ -89,12 +92,9 @@ def test_model_field_clean_without_clean_method(model_field):
 
 def test_model_field_clean_nested(model):
     class MyModel(Model):
-        class Meta:
-            fields = (
-                'foo',
-                'bar',
-                'baz',
-            )
+        foo: str
+        bar: str
+        baz: Any
 
         def clean_foo(self, value):
             return value.strip()
@@ -120,12 +120,7 @@ def test_model_field_clean_type_conversion(model):
         numbers: List[float]
         string: str
         strings: Tuple[str]
-        string_none: str
-
-        class Meta:
-            allow_empty = (
-                'string_none',
-            )
+        string_none: str = None
 
     class Foo:
         def __init__(self, foo):
