@@ -1,19 +1,14 @@
 import os
-import re
 import sys
 from pathlib import Path
 from shutil import rmtree
 
 from setuptools import setup, find_packages, Command
+from simple_model.__version__ import __version__
 
 here = Path.cwd()
 with open(here / 'README.rst') as f:
     readme = '\n' + f.read()
-
-with open(here / 'CHANGES.rst') as f:
-    changes = '\n' + f.read()
-    version_match = re.search(r'\n(\d+.\d+.\d+) /', changes)
-    version = version_match.groups()[0]
 
 
 class UploadCommand(Command):
@@ -47,7 +42,7 @@ class UploadCommand(Command):
         os.system('twine upload dist/*')
 
         self.status('Pushing git tags…')
-        os.system('git tag v{0}'.format(version))
+        os.system('git tag v{0}'.format(__version__))
         os.system('git push --tags')
 
         sys.exit()
@@ -55,9 +50,9 @@ class UploadCommand(Command):
 
 setup(
     name='pysimplemodel',
-    version=version,
+    version=__version__,
     description='Data handling made easy',
-    long_description='\n' + readme + changes,
+    long_description='\n' + readme,
     url='https://github.com/lamenezes/simple-model',
     author='Luiz Menezes',
     author_email='luiz.menezesf@gmail.com',
