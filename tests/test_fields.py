@@ -78,36 +78,30 @@ def test_model_field_validate_empty_field(empty_model_field, blank_value):
         empty_model_field.validate(None, None)
 
 
-def test_model_field_clean(model_field):
-    model_field._clean = lambda _, s: s.strip()
+def test_model_field_validate_and_clean(model_field):
+    model_field._validate = lambda _, s: s.strip()
 
-    assert model_field.clean(None, ' foo ') == 'foo'
-
-
-def test_model_field_clean_without_clean_method(model_field):
-    model_field._clean = None
-
-    assert model_field.clean(None, ' foo ') == ' foo '
+    assert model_field.validate(None, ' foo ') == 'foo'
 
 
-def test_model_field_clean_nested(model):
+def test_model_field_validate_and_clean_clean_nested(model):
     class MyModel(Model):
         foo: str
         bar: str
         baz: Any
 
-        def clean_foo(self, value):
+        def validate_foo(self, value):
             return value.strip()
 
     model = MyModel(foo=' foo ', bar='bar', baz='baz')
     other_model = MyModel(foo='foo', bar='bar', baz=model)
 
-    other_model.clean()
+    other_model.validate()
 
     assert model.foo == 'foo'
 
 
-def test_model_field_clean_type_conversion(model):
+def test_model_field_validate_and_clean_type_conversion(model):
     OtherModel = type(model)
 
     class TypedModel(Model):
@@ -140,7 +134,7 @@ def test_model_field_clean_type_conversion(model):
         strings=tuple(iterable),
     )
 
-    model.clean()
+    model.validate()
     assert isinstance(model.any, Foo)
     assert isinstance(model.iterable, list)
     assert model.iterable == iterable
@@ -168,4 +162,4 @@ def test_field_conversion_model_type_conflict(model):
     my_model = MyModel(field=model)
     invalid_model = MyModel(field=my_model)
     with pytest.raises(AssertionError):
-        invalid_model.clean()
+        invalid_model.validate()

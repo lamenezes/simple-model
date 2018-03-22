@@ -84,8 +84,6 @@ class Model(metaclass=BaseModel):
             return False
 
     def __iter__(self) -> Iterator[Tuple[str, Any]]:
-        self.clean()
-
         for name, value, descriptor in self._get_fields():
             yield name, descriptor.to_python(value)
 
@@ -120,20 +118,15 @@ class Model(metaclass=BaseModel):
             return False
         return not bool(value)
 
-    def clean(self):
-        for name, value, descriptor in self._get_fields():
-            clean_value = descriptor.clean(self, value)
-            setattr(self, name, clean_value)
-
-        self.validate()
-
     def validate(self, raise_exception: bool=True) -> Union[None, bool]:
         for name, value, descriptor in self._get_fields():
             try:
-                descriptor.validate(self, value)
+                value = descriptor.validate(self, value)
             except ValidationError:
                 if raise_exception:
                     raise
                 return False
+            else:
+                setattr(self, name, value)
 
         return None if raise_exception else True

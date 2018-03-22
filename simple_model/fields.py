@@ -19,11 +19,6 @@ class ModelField:
         except AttributeError:
             self._validate = None
 
-        try:
-            self._clean = getattr(model_class, 'clean_{}'.format(name))
-        except AttributeError:
-            self._clean = None
-
     @property
     def default_value(self):
         return self._default_value if self._default_value is not Unset else None
@@ -60,18 +55,9 @@ class ModelField:
 
         return field_type(value)
 
-    def clean(self, instance, value):
-        value = self.convert_to_type(instance, value)
-        clean_value = value if not self._clean else self._clean(instance, value)
-
-        try:
-            value.clean()
-        except AttributeError:
-            pass
-
-        return clean_value
-
     def validate(self, instance, value):
+        value = self.convert_to_type(instance, value)
+
         if self._default_value is Unset and self.model_class.is_empty(value):
             raise EmptyField(self.name)
 
@@ -81,7 +67,9 @@ class ModelField:
         try:
             value.validate()
         except AttributeError:
-            return
+            return value
+
+        return value
 
     def to_python(self, value):
         if isinstance(value, (list, tuple)):

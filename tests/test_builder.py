@@ -13,7 +13,6 @@ def test_model_class_builder():
     assert len(Birl._meta.fields) == len(keys)
     assert set(Birl._meta.fields) == set(keys)
 
-    assert birl.clean() is None
     assert birl.validate(raise_exception=False) is True
     assert dict(birl) == {'f': None, 'b': None}
 

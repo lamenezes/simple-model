@@ -15,6 +15,7 @@ class MyModel(Model):
     def validate_foo(self, value):
         if len(value) != 3:
             raise ValidationError()
+        return value
 
 
 @pytest.fixture
