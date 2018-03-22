@@ -105,6 +105,11 @@ Validating data on your model
 
 TBD
 
+Allowing empty values on field validation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+TBD
+
 
 Converting models to dict
 =========================
@@ -114,6 +119,23 @@ TBD
 
 Creating models instances and classes from dicts
 ================================================
+
+TBD
+
+
+Model inheritance
+=================
+
+TBD
+
+Field conversion and customizing model initialization
+=====================================================
+
+TBD (``__post_init__``)
+
+
+Building models and model classes dynamically
+=============================================
 
 TBD
 
