@@ -15,3 +15,4 @@ coverage.xml
 [._]*.s[a-w][a-z]
 .mypy_cache
 .idea
+.pytest_cache
