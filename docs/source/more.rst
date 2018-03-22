@@ -5,14 +5,14 @@ Models are used to manage business logic, data and rules of applications.
 Data is represented by model classes and its fields. The easiest way to
 define fields using simple model is by using `type hints`_ syntax:
 
-.. code:: python
+.. code-block:: python
 
     from decimal import Decimal
 
     from simple_model import Model
 
 
-    class ProductCategory(Model):
+    class Category(Model):
         name: str
         is_active: bool = False
 
@@ -20,12 +20,12 @@ define fields using simple model is by using `type hints`_ syntax:
     class Product(Model):
         title: str
         description: str
-        category: ProductCategory
+        category: Category
         price: Decimal
         is_active: bool = False
 
 
-In the example above we create two models ``ProductCategory`` with ``name``
+In the example above we create two models ``Category`` with ``name``
 and ``is_active`` fields and ``Product`` with ``title``, ``description`` and
 other fields.
 
@@ -34,9 +34,9 @@ or constructors) that receives all the specified fields as parameters.
 To create model instances just do the following:
 
 
-.. code:: python
+.. code-block:: python
 
-    category = ProductCategory(
+    category = Category(
         name='clothing',
         is_active=True,
     )
@@ -58,40 +58,35 @@ model class.
 Defining fields without explicit types
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you don't want to enforce types on your fields it is possible to:
+If you don't want to enforce types on your fields it is possible to use
+``typing.Any`` as  a field type. This way simple model will ignore any type-related
+feature on the declared model:
 
-1. Use ``typing.Any`` as field type
-2. Define fields using the ``Meta`` class
+.. code-block:: python
 
-Let's try to define fields without typing by using the first approach:
-
-.. code:: python
-
-    import typing
+    from typing import Any
 
     from simple_model import Model
 
 
-    class Bag:
-        name: typing.Any
-        brand: typing.Any
-        items: typing.Any
+    class Bag(Model):
+        name: Any
+        brand: Any
+        items: Any
 
 
-This notation can turn repetitive when working with a great number of fields.
+If you are not fond of using type annotations you may
+This notation may become repetitive when working with a great number of fields.
 So simple model also support creating fields by defining a fields attribute
 inside the model ``Meta`` class. The attribute must be a tuple of the name
 of each field as a string. This behaviour is shown in the following example:
 
-.. code:: python
+.. code-block:: python
 
     class Bag:
-        class Meta:
-            fields = (
-                'name',
-                'brand',
-                'items',
-            )
+        name = Field
+        brand = None
+        items = []
 
 
 The result is the same on both examples: a model ``Bag`` is created with
@@ -100,19 +95,13 @@ same way as showed on previous examples.
 
 It is also possible to define fields using both approaches:
 
-.. code:: python
+.. code-block:: python
 
     # TBD
 
 
 Validating data on your model
 =============================
-
-TBD
-
-
-Cleaning values on your fields
-==============================
 
 TBD
 

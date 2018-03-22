@@ -39,31 +39,35 @@ To define your models is as simple as stated in the following example:
 
     class Person(Model):
         age: int
-        height: float
+        is_active: bool = False
         name: str
-        weight: float
-
-        class Meta:
-            allow_empty = ('height', 'weight')
-
-        def clean_name(self, name):
-            return name.strip()
 
         def validate_age(self, age):
             if age < 0 or age > 150:
-                raise ValidationError('Invalid value for age "{!r}"'.format(age))
+                raise ValidationError('Invalid age')
+            return age
 
-        def validate_height(self, height):
-            if height <= 0:
-                raise ValidationError('Invalid value for height "{!r}"'.format(age))
+        def validate_name(self, name):
+            if len(name) == 0:
+                raise ValidationError('Invalid name')
+            return name.strip()
 
+
+.. code:: python
 
     >>> person = Person(name='John Doe', age=18)
     >>> person.name
     'John Doe'
+    >> print(person.is_active)
+    False
     >>> person.validate()
     >>> dict(person)
-    {'name': 'John Doe', 'age': 18, 'height': '', 'weight': ''}
+    {'name': 'John Doe', 'age': 18, is_active: False}
+    >> other_person = Person(name='', age=44)
+    >> other_person.validate()
+    Traceback (most recent call last):
+      ...
+    ValidationError: Invalid name
 
 
 If you want to understand better other simple model features consult the
