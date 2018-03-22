@@ -7,7 +7,7 @@ from .utils import camel_case, coerce_to_alpha, snake_case
 def model_class_builder(class_name: str, data: Any) -> type:
     keys = data.keys() or ('',)
     attrs = {key: None for key in keys}
-    attrs['__annotations__'] = {key: Any for key in keys}
+    attrs['__annotations__'] = {key: Any for key in keys}  # type: ignore
     new_class = type(class_name, (Model,), attrs)
     return new_class
 
