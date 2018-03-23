@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+from simple_model.converters import to_dict
 from simple_model.exceptions import EmptyField, ValidationError
 from simple_model.fields import ModelField
 from simple_model.models import Model
@@ -37,12 +38,15 @@ def test_model_field_to_python_simple(model_field, value):
 
 
 def test_model_field_to_python_nested(model2, model_field):
-    assert model_field.to_python(model2) == dict(model2)
+    model2.validate()
+    assert model_field.to_python(model2) == to_dict(model2)
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))
 def test_model_field_to_python_nested_iterable(iterable, model_field, model, model2):
-    assert model_field.to_python(iterable([model, model2])) == [dict(model), dict(model2)]
+    model.validate()
+    model2.validate()
+    assert model_field.to_python(iterable([model, model2])) == [to_dict(model), to_dict(model2)]
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))

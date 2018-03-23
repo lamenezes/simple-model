@@ -1,5 +1,6 @@
 import inspect
 import re
+import typing
 
 
 def capitalize_first(string: str) -> str:
@@ -34,3 +35,7 @@ def is_not_special_object(obj):
         inspect.isroutine(obj),
         isinstance(obj, property)
     ))
+
+
+def getkey(d: dict, key: typing.Any):
+    return d[key]

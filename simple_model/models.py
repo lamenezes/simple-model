@@ -3,7 +3,7 @@ from typing import Any, Callable, Iterable, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
 from .fields import ModelField, Unset
-from .utils import is_not_special_object
+from .utils import is_not_special_object, getkey
 
 
 class BaseModel(type):
@@ -80,14 +80,29 @@ class Model(metaclass=BaseModel):
         pass
 
     def __eq__(self, other: Any) -> bool:
-        try:
-            return dict(self) == dict(other)  # type: ignore
-        except (TypeError, ValueError):
+        if isinstance(other, Model):
+            other_fields = list(other._get_fields())
+            get_func = getattr
+        else:
+            try:
+                other = dict(other)
+            except (ValueError, TypeError):
+                return NotImplemented
+            other_fields = other
+            get_func = getkey  # type: ignore
+
+        self_fields = list(self._get_fields())
+        if len(self_fields) != len(other_fields):
             return False
 
-    def __iter__(self) -> Iterator[Tuple[str, Any]]:
-        for name, value, descriptor in self._get_fields():
-            yield name, descriptor.to_python(value)
+        for name, value, _ in self_fields:
+            try:
+                if value != get_func(other, name):
+                    return False
+            except AttributeError:
+                return False
+
+        return True
 
     def __repr__(self) -> str:
         attrs = ', '.join(

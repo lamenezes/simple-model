@@ -181,14 +181,30 @@ def test_base_model___eq___not_equals(model):
     assert model != 'model'
 
 
+def test_base_model___eq___not_equals_same_model():
+    model = FooBarModel(foo='bar', bar='foo')
+    other_model = FooBarModel(foo='fool', bar='bare')
+
+    assert model != other_model
+
+
+def test_base_model___eq___not_equals_different_models_same_field_qty():
+    class OtherModel(Model):
+        baz: str
+        qux: str
+
+    model = FooBarModel(foo='bar', bar='foo')
+    other_model = OtherModel(baz='fool', qux='bare')
+
+    assert model != other_model
+
+
 def test_model(model):
     assert model.foo == 'foo'
     assert model.bar == 'bar'
     assert model.baz == ''
     assert model.qux == ''
     assert 'foo' in repr(model)
-    for k, v in model:
-        assert k in model._meta.fields
 
 
 def test_model__get_fields(model):
@@ -256,29 +272,6 @@ def test_model_validate_nested(nested_model):
     assert nested_model.validate(raise_exception=False) is False
 
 
-def test_model_iter_simple(model):
-    as_dict_model = {
-        'foo': 'foo',
-        'bar': 'bar',
-        'baz': '',
-        'qux': '',
-    }
-    assert dict(model) == as_dict_model
-
-
-@pytest.mark.parametrize('iterable', (list, tuple))
-def test_model_iter_nested_list(iterable, model, model2):
-    other_model = MyModel(foo='foo', bar=iterable([model, model2]), baz=model)
-    as_dict = dict(other_model)
-    expected = {
-        'foo': 'foo',
-        'bar': [dict(model), dict(model2)],
-        'baz': dict(model),
-        'qux': None
-    }
-    assert as_dict == expected
-
-
 def test_model_validate_and_clean_without_clean_method(model):
     for field_name in model._meta.fields:
         setattr(model, field_name, field_name)
@@ -323,22 +316,6 @@ def test_model_validate_and_clean_nested(nested_model):
     assert nested_model.qux == 'qux'
     assert nested_model.baz.qux == 'qux'
     assert nested_model.baz.baz.qux == 'qux'
-
-
-def test_model_iter_clean(model):
-    class CleanBarMyModel(Model):
-        foo: str
-        bar: str
-        baz = ''
-        qux = ''
-
-        def validate_bar(self, value):
-            return value.strip()
-
-    model = CleanBarMyModel(foo='foo', bar=' bar ', baz='', qux='')
-    model.validate()
-    as_dict = dict(model)
-    assert as_dict == {'foo': 'foo', 'bar': 'bar', 'baz': '', 'qux': ''}
 
 
 def test_model_get_fields_invalid():

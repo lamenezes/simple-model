@@ -1,7 +1,7 @@
 import pytest
 
 from simple_model.builder import model_builder, model_class_builder, model_many_builder
-from simple_model.models import Model
+from simple_model import Model, to_dict
 
 
 def test_model_class_builder():
@@ -14,7 +14,7 @@ def test_model_class_builder():
     assert set(Birl._meta.fields) == set(keys)
 
     assert birl.validate(raise_exception=False) is True
-    assert dict(birl) == {'f': None, 'b': None}
+    assert to_dict(birl) == {'f': None, 'b': None}
 
 
 def test_model_class_builder_empty_data():

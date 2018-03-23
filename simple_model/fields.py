@@ -79,11 +79,13 @@ class ModelField:
         return value
 
     def to_python(self, value):
+        from .converters import to_dict
+
         if isinstance(value, (list, tuple)):
             python_value = []
             for elem in value:
                 try:
-                    elem = dict(elem)
+                    elem = to_dict(elem)
                 except (TypeError, ValueError):
                     pass
                 python_value.append(elem)
@@ -93,6 +95,6 @@ class ModelField:
             return value
 
         try:
-            return dict(value)
+            return to_dict(value)
         except (TypeError, ValueError):
             return value

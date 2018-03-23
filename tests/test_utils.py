@@ -1,4 +1,6 @@
-from simple_model.utils import camel_case, capitalize_first, coerce_to_alpha, snake_case
+import pytest
+
+from simple_model.utils import camel_case, capitalize_first, coerce_to_alpha, getkey, snake_case
 
 
 def test_utils_capitalize_first():
@@ -28,3 +30,11 @@ def test_snake_case():
     assert snake_case('foo') == 'foo'
     assert snake_case('FooBarBazQux') == 'foo_bar_baz_qux'
     assert snake_case('FooBarBaz___') == 'foo_bar_baz___'
+
+
+def test_getkey():
+    d = {'foo': 'bar'}
+    assert getkey(d, 'foo') == d['foo']
+
+    with pytest.raises(KeyError):
+        getkey(d, 'toba')
