@@ -1,3 +1,5 @@
+import typing
+
 import pytest
 
 from simple_model.builder import model_builder, model_class_builder, model_many_builder
@@ -128,6 +130,8 @@ def test_model_many_builder():
 
     models = model_many_builder(data)
 
+    assert isinstance(models, typing.Generator)
+    models = list(models)
     assert len(models) == model_count
     first = models[0]
     for model in models[1:]:
@@ -137,5 +141,6 @@ def test_model_many_builder():
 @pytest.mark.parametrize('iterable', ([], ()))
 def test_model_many_builder_empty_iterable(iterable):
     models = model_many_builder(iterable)
-    assert isinstance(models, list)
-    assert models == []
+
+    assert isinstance(models, typing.Generator)
+    assert len(list(models)) == 0

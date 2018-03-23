@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, Generator
 
 from .models import Model
 from .utils import camel_case, coerce_to_alpha, snake_case
@@ -55,14 +55,13 @@ def model_builder(
 def model_many_builder(
     data: list, class_name: str='MyModel', cls: type=None, recurse: bool=True,
     snake_case_keys: bool=True, alpha_keys: bool=True,
-) -> List[Model]:
+) -> Generator[Model, None, None]:
 
     if len(data) == 0:
-        return []
+        return
 
     first = data[0]
     cls = model_class_builder(class_name, first)
-    models = []
     for element in data:
         model = model_builder(
             data=element,
@@ -72,6 +71,4 @@ def model_many_builder(
             snake_case_keys=snake_case_keys,
             alpha_keys=alpha_keys,
         )
-        models.append(model)
-
-    return models
+        yield model
