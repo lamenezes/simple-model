@@ -61,6 +61,13 @@ class ModelField:
         if self._default_value is Unset and self.model_class.is_empty(value):
             raise EmptyField(self.name)
 
+        if isinstance(value, (list, tuple)):
+            for elem in value:
+                try:
+                    elem.validate()
+                except AttributeError:
+                    continue
+
         if self._validate:
             return self._validate(instance, value)
 

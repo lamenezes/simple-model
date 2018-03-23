@@ -478,3 +478,24 @@ def test_model_validate_and_clean_invalid_model_validate_called_after_clean(mode
     model = MyModel(foo='fo ', bar='bar')
     with pytest.raises(ValidationError):
         model.validate()
+
+
+def test_model_validate_and_clean_model_list(model):
+    class MyModel(Model):
+        foo: str
+        bar: typing.List = []
+
+        def validate_foo(self, foo):
+            return foo.strip()
+
+    model = MyModel(foo='foo ')
+    model2 = MyModel(foo='foo ')
+    model3 = MyModel(
+        foo='foo ',
+        bar=[model, model2],
+    )
+    model3.validate()
+
+    assert model3.foo == 'foo'
+    assert model2.foo == 'foo'
+    assert model.foo == 'foo'
