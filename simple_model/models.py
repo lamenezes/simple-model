@@ -64,6 +64,8 @@ class BaseModel(type):
 
 class Model(metaclass=BaseModel):
     def __init__(self, **kwargs):
+        self._validation_count = 0
+
         for field_name in self._meta.fields:
             descriptor = getattr(type(self), field_name)
             field_value = kwargs.get(field_name)
@@ -119,6 +121,8 @@ class Model(metaclass=BaseModel):
         return not bool(value)
 
     def validate(self, raise_exception: bool=True) -> Union[None, bool]:
+        self._validation_count += 1
+
         for name, value, descriptor in self._get_fields():
             try:
                 value = descriptor.validate(self, value)
