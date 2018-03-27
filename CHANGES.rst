@@ -2,10 +2,18 @@
 Changes
 =======
 
-2.0.0 / 2018-XX-0X
+2.0.0 / UNRELEASED
 ==================
 
+* Move clean responsibility to validation (remove ``clean`` method support)
+* Move conversion on validation from field to model
 * Remove ``Meta`` class from simple model
+* Fix model validation to properly validate fields with values of list of models
+* Fix model field converstion for cases when field type is a subclass of Model
+* Move conversion to dict to ``simple_model.to_dict`` function (instead of built-in ``dict`` function)
+* Return generator on ``simple_model.builder.model_many_builder`` instead of list
+* TODO Improve docs
+
 
 1.1.5 / 2018-05-03
 ==================
@@ -72,20 +80,20 @@ Changes
 * Improve documentation
 
 
-0.15.0 / 2017-19-12
+0.15.0 / 2017-12-19
 ===================
 
 * Use pipenv
 * Drop python 3.3 support
 
 
-0.14.0 / 2017-21-11
+0.14.0 / 2017-11-21
 ===================
 
 * Add ``model_many_builder()``. It builds lists of models from data lists
 * Fix travis config
 
-0.13.0 / 2017-21-11
+0.13.0 / 2017-11-21
 ===================
 
 * Transfrom ``BaseModel.is_empty`` from an instance method to a class method
