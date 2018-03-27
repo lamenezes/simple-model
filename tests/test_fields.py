@@ -5,7 +5,7 @@ import pytest
 
 from simple_model.converters import to_dict
 from simple_model.exceptions import EmptyField, ValidationError
-from simple_model.fields import ModelField
+from simple_model.fields import ModelField, Unset
 from simple_model.models import Model
 
 from .conftest import MyModel
@@ -32,6 +32,11 @@ def test_model_field(model_field):
     assert issubclass(str, model_field.type)
 
 
+def test_empty_model_field_default_value(empty_model_field):
+    assert empty_model_field._default_value is Unset
+    assert empty_model_field.default_value is None
+
+
 @pytest.mark.parametrize('value', (1, '1', [2], ['2']))
 def test_model_field_to_python_simple(model_field, value):
     assert model_field.to_python(value) == value
@@ -51,7 +56,7 @@ def test_model_field_to_python_nested_iterable(iterable, model_field, model, mod
 
 @pytest.mark.parametrize('iterable', (list, tuple))
 def test_model_field_to_python_iterable_empty(iterable, model_field, model, model2):
-    assert model_field.to_python(iterable([])) == []
+    assert model_field.to_python(iterable([])) == iterable()
 
 
 @pytest.mark.parametrize('iterable', (list, tuple))

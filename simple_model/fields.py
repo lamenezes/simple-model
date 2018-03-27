@@ -79,22 +79,23 @@ class ModelField:
         return value
 
     def to_python(self, value):
-        from .converters import to_dict
-
-        if isinstance(value, (list, tuple)):
-            python_value = []
-            for elem in value:
-                try:
-                    elem = to_dict(elem)
-                except (TypeError, ValueError):
-                    pass
-                python_value.append(elem)
-            return python_value
-
         if not value:
             return value
 
-        try:
-            return to_dict(value)
-        except (TypeError, ValueError):
-            return value
+        from .converters import to_dict
+        if not isinstance(value, (list, tuple)):
+            try:
+                return to_dict(value)
+            except (TypeError, ValueError):
+                return value
+
+        python_value = []
+        for elem in value:
+            try:
+                elem = to_dict(elem)
+            except (TypeError, ValueError):
+                pass
+            python_value.append(elem)
+
+        value_cls = type(python_value)
+        return python_value if issubclass(value_cls, list) else value_cls(python_value)
