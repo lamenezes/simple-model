@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+import typing
 from unittest import mock
 
 import pytest
@@ -23,6 +23,11 @@ def model_field():
 @pytest.fixture
 def empty_model_field():
     return ModelField(MyModel, name='bar', type=str)
+
+
+@pytest.fixture
+def typeless_model_field():
+    return ModelField(MyModel, name='bar')
 
 
 def test_model_field(model_field):
@@ -97,7 +102,7 @@ def test_model_field_validate_and_clean_clean_nested(model):
     class MyModel(Model):
         foo: str
         bar: str
-        baz: Any
+        baz: typing.Any
 
         def validate_foo(self, value):
             return value.strip()
@@ -110,65 +115,76 @@ def test_model_field_validate_and_clean_clean_nested(model):
     assert model.foo == 'foo'
 
 
-def test_model_field_validate_and_clean_type_conversion(model):
-    OtherModel = type(model)
+def test_model_field_convert_to_type_unset(typeless_model_field):
+    value = 'valuable'
 
-    class TypedModel(Model):
-        any: Any
-        iterable: List
-        model: OtherModel
-        model_as_dict: OtherModel
-        models: List[OtherModel]
-        number: float
-        numbers: List[float]
-        string: str
-        strings: Tuple[str]
-        string_none: str = None
+    assert typeless_model_field.convert_to_type(None, value) is value
 
-    class Foo:
-        def __init__(self, foo):
-            pass
+    typeless_model_field.type = typing.Any
+    assert typeless_model_field.convert_to_type(None, value) is value
 
-    model_data = {'foo': 'foo', 'bar': 'bar'}
-    iterable = ['1', 2, '3']
-    model = TypedModel(
-        any=Foo('toba'),
-        iterable=list(iterable),
-        model=OtherModel(**model_data),
-        model_as_dict=model_data,
-        models=[model_data],
-        number='10',
-        numbers=list(iterable),
-        string=1,
-        strings=tuple(iterable),
-    )
+    assert typeless_model_field.convert_to_type(None, value, field_type=None) is value
 
-    model.validate()
-    assert isinstance(model.any, Foo)
-    assert isinstance(model.iterable, list)
-    assert model.iterable == iterable
-    assert isinstance(model.model, TypedModel.model.type)
-    assert isinstance(model.models, list)
-    for elem in model.models:
-        assert isinstance(elem, TypedModel.models.type.__args__[0])
-    assert isinstance(model.number, TypedModel.number.type)
-    assert isinstance(model.numbers, list)
-    for elem in model.numbers:
-        assert isinstance(elem, TypedModel.numbers.type.__args__[0])
-    assert isinstance(model.string, TypedModel.string.type)
-    assert isinstance(model.strings, tuple)
-    for elem in model.strings:
-        assert isinstance(elem, TypedModel.strings.type.__args__[0])
-    assert model.string_none is None
+    assert typeless_model_field.convert_to_type(None, value, field_type=typing.Any) is value
 
 
-def test_field_conversion_model_type_conflict(model):
-    OtherModel = type(model)
+def test_model_field_convert_to_type_value_has_correct_type(model_field):
+    value = 'valuable'
 
-    class MyModel(Model):
-        field: OtherModel
+    assert model_field.convert_to_type(None, value) is value
 
-    my_model = MyModel(field=model)
-    invalid_model = MyModel(field=my_model)
+
+def test_model_field_convert_to_type_invalid_model_type(model_field):
+    model_field.type = Model
+    value = MyModel()
+
     with pytest.raises(AssertionError):
-        invalid_model.validate()
+        model_field.convert_to_type(None, value)
+
+
+def test_model_field_convert_to_type_model_type(model_field):
+    model_field.type = MyModel
+    value = {}
+
+    model = model_field.convert_to_type(None, value)
+
+    assert isinstance(model, MyModel)
+
+
+def test_model_field_convert_to_type(model_field):
+    value = 1
+
+    assert model_field.convert_to_type(None, value) == '1'
+
+
+@pytest.mark.parametrize('iterable_type, iterable_cls', (
+    (typing.List, list),
+    (typing.Tuple, tuple),
+))
+def test_model_field_convert_to_type_iterable_without_type(iterable_type, iterable_cls, model_field):
+    model_field.type = iterable_type
+    value = iterable_cls([1, 2])
+
+    assert model_field.convert_to_type(None, value) == value
+
+
+@pytest.mark.parametrize('iterable_type, iterable_cls', (
+    (typing.List[str], list),
+    (typing.Tuple[str], tuple),
+))
+def test_model_field_convert_to_type_iterable(iterable_type, iterable_cls, model_field):
+    model_field.type = iterable_type
+    value = iterable_cls([1, 2])
+
+    assert model_field.convert_to_type(None, value) == iterable_cls(['1', '2'])
+
+
+@pytest.mark.parametrize('iterable_type, iterable_cls', (
+    (typing.List[int], list),
+    (typing.Tuple[int], tuple),
+))
+def test_model_field_convert_to_type_iterable_same_type(iterable_type, iterable_cls, model_field):
+    model_field.type = iterable_type
+    value = iterable_cls([1, 2])
+
+    assert model_field.convert_to_type(None, value) == value

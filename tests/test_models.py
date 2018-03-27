@@ -476,3 +476,76 @@ def test_model_validate_and_clean_model_list(model):
     assert model3.foo == 'foo'
     assert model2.foo == 'foo'
     assert model.foo == 'foo'
+
+
+@pytest.mark.parametrize('empty_value', ('', None))
+def test_wtf_validate(empty_value):
+    class MyModel(Model):
+        foo: str = empty_value
+
+    model = MyModel()
+    assert model.validate() is None  # does not raise EmptyField
+
+
+def test_model_validate_and_clean_type_conversion(model):
+    OtherModel = type(model)
+
+    class TypedModel(Model):
+        any: typing.Any
+        iterable: typing.List
+        model: OtherModel
+        model_as_dict: OtherModel
+        models: typing.List[OtherModel]
+        number: float
+        numbers: typing.List[float]
+        string: str
+        strings: typing.Tuple[str]
+        string_none: str = None
+
+    class Foo:
+        def __init__(self, foo):
+            pass
+
+    model_data = {'foo': 'foo', 'bar': 'bar'}
+    iterable = ['1', 2, '3']
+    model = TypedModel(
+        any=Foo('toba'),
+        iterable=list(iterable),
+        model=OtherModel(**model_data),
+        model_as_dict=model_data,
+        models=[model_data],
+        number='10',
+        numbers=list(iterable),
+        string=1,
+        strings=tuple(iterable),
+    )
+
+    model.validate()
+    assert isinstance(model.any, Foo)
+    assert isinstance(model.iterable, list)
+    assert model.iterable == iterable
+    assert isinstance(model.model, TypedModel.model.type)
+    assert isinstance(model.models, list)
+    for elem in model.models:
+        assert isinstance(elem, TypedModel.models.type.__args__[0])
+    assert isinstance(model.number, TypedModel.number.type)
+    assert isinstance(model.numbers, list)
+    for elem in model.numbers:
+        assert isinstance(elem, TypedModel.numbers.type.__args__[0])
+    assert isinstance(model.string, TypedModel.string.type)
+    assert isinstance(model.strings, tuple)
+    for elem in model.strings:
+        assert isinstance(elem, TypedModel.strings.type.__args__[0])
+    assert model.string_none is None
+
+
+def test_field_conversion_model_type_conflict(model):
+    OtherModel = type(model)
+
+    class MyModel(Model):
+        field: OtherModel
+
+    my_model = MyModel(field=model)
+    invalid_model = MyModel(field=my_model)
+    with pytest.raises(AssertionError):
+        invalid_model.validate()

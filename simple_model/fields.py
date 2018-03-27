@@ -28,13 +28,13 @@ class ModelField:
         if not field_type or field_type is Any or value is None:
             return value
 
-        if not issubclass(field_type, PARAMETRIZED_GENERICS) and isinstance(value, field_type):
+        if not issubclass(field_type, PARAMETRIZED_GENERICS) and type(value) is field_type:
             return value
 
         from simple_model.models import Model
         if issubclass(field_type, Model) and isinstance(value, Model):
-            assert isinstance(value, field_type), ('Field of type {} received an object of invalid '
-                                                   'type {}').format(field_type, type(value))
+            assert type(value) is field_type, ('Field of type {} received an object of invalid '
+                                               'type {}').format(field_type, type(value))
 
         if issubclass(field_type, Model):
             return field_type(**value)
