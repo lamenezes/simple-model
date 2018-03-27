@@ -352,17 +352,18 @@ def test_type_model(typed_model, model_clean_validate_foo):
     assert typed_model.models == [model_clean_validate_foo] * 2
 
 
-def test_typed_model_clean_type_conversion(
+def test_typed_model_type_conversion(
     typed_model, model_clean_validate_foo_data, model_clean_validate_foo
 ):
-    typed_model.common = 'common'
+    typed_model.common = 'wololo'
     typed_model.number = '6.9'
     typed_model.string = 6.9
     typed_model.model = model_clean_validate_foo_data
     typed_model.models = [model_clean_validate_foo_data] * 2
 
-    typed_model.validate()
+    typed_model.convert_fields()
 
+    assert isinstance(typed_model.common, str)
     assert isinstance(typed_model.number, float)
     assert isinstance(typed_model.string, str)
     assert isinstance(typed_model.model, Model)

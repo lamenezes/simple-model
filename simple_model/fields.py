@@ -56,8 +56,6 @@ class ModelField:
         return field_type(value)
 
     def validate(self, instance, value):
-        value = self.convert_to_type(instance, value)
-
         if self._default_value is Unset and self.model_class.is_empty(value):
             raise EmptyField(self.name)
 
