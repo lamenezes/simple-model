@@ -12,6 +12,7 @@ Changes
 * Fix model field converstion for cases when field type is a subclass of Model
 * Move conversion to dict to ``simple_model.to_dict`` function (instead of built-in ``dict`` function)
 * Return generator on ``simple_model.builder.model_many_builder`` instead of list
+* Fix setup.py path handling
 * TODO Improve docs
 
 

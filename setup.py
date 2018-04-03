@@ -6,7 +6,7 @@ from shutil import rmtree
 from setuptools import setup, find_packages, Command
 from simple_model.__version__ import __version__
 
-here = Path.cwd()
+here = Path(__file__).parent
 with open(here / 'README.rst') as f:
     readme = '\n' + f.read()
 
