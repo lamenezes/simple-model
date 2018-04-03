@@ -99,13 +99,10 @@ the following piece of code:
 
 
     class Person(Model):
-        age: int
-        height: float
+        age: int = None
+        height: float = None
         is_active: bool = True
         name: str
-
-        class Meta:
-            allow_empty = ('age', 'height')
 
 
 Now let's test it:
@@ -115,7 +112,8 @@ Now let's test it:
     >> person = Person(name='Jane Doe', is_active=False)
     >> person.is_active
     False
-    >> person.validate()
+    >> person.validate(raise_exception=False)
+    True
 
 The last line won't raise an exception which means the model instance is valid!
 In case you need the validation to return True or False instead of raising an

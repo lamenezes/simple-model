@@ -75,31 +75,6 @@ feature on the declared model:
         items: Any
 
 
-If you are not fond of using type annotations you may
-This notation may become repetitive when working with a great number of fields.
-So simple model also support creating fields by defining a fields attribute
-inside the model ``Meta`` class. The attribute must be a tuple of the name
-of each field as a string. This behaviour is shown in the following example:
-
-.. code-block:: python
-
-    class Bag:
-        name = Field
-        brand = None
-        items = []
-
-
-The result is the same on both examples: a model ``Bag`` is created with
-``name``, ``brand`` and ``items`` fields. Model instances are created the
-same way as showed on previous examples.
-
-It is also possible to define fields using both approaches:
-
-.. code-block:: python
-
-    # TBD
-
-
 Validating data on your model
 =============================
 
