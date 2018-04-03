@@ -550,3 +550,14 @@ def test_field_conversion_model_type_conflict(model):
     invalid_model = MyModel(field=my_model)
     with pytest.raises(AssertionError):
         invalid_model.validate()
+
+
+def test_field_conversion_list(model):
+    class ListModel(Model):
+        elements: list
+
+    iterable = (1, 2, 3)
+    model = ListModel(elements=iterable)
+    model.convert_fields()
+
+    assert model.elements == list(iterable)

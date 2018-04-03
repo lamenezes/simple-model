@@ -40,9 +40,14 @@ class ModelField:
             return field_type(**value)
 
         if issubclass(field_type, (list, tuple)):
-            element_field_type = field_type.__args__[0] if field_type.__args__ else None
+            try:
+                element_field_type = field_type.__args__[0] if field_type.__args__ else None
+            except AttributeError:
+                element_field_type = None
+
+            iterable_field_type = tuple if issubclass(field_type, tuple) else list
             if not element_field_type:
-                return value
+                return iterable_field_type(value)
 
             values = []
             for elem in value:
@@ -50,7 +55,6 @@ class ModelField:
                     elem = self.convert_to_type(instance, elem, field_type=element_field_type)
                 values.append(elem)
 
-            iterable_field_type = tuple if issubclass(field_type, tuple) else list
             return iterable_field_type(values)
 
         return field_type(value)

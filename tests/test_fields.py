@@ -172,11 +172,19 @@ def test_model_field_convert_to_type_iterable_without_type(iterable_type, iterab
     (typing.List[str], list),
     (typing.Tuple[str], tuple),
 ))
-def test_model_field_convert_to_type_iterable(iterable_type, iterable_cls, model_field):
+def test_model_field_convert_to_type_iterable_typed(iterable_type, iterable_cls, model_field):
     model_field.type = iterable_type
     value = iterable_cls([1, 2])
 
     assert model_field.convert_to_type(None, value) == iterable_cls(['1', '2'])
+
+
+@pytest.mark.parametrize('iterable_type', (list, tuple))
+def test_model_field_convert_to_type_iterable_generic(iterable_type, model_field):
+    model_field.type = iterable_type
+    value = iterable_type([1, 2])
+
+    assert model_field.convert_to_type(None, value) == value
 
 
 @pytest.mark.parametrize('iterable_type, iterable_cls', (
