@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-here = Path(__file__).parent
+here = Path(__file__).absolute().parent
 
 with open(here.parent / 'CHANGES.rst') as f:
     changes = '\n' + f.read()
