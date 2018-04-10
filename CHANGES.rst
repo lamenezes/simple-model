@@ -2,7 +2,7 @@
 Changes
 =======
 
-2.0.0 / UNRELEASED
+2.0.0 / 2018-04-10
 ==================
 
 * Move clean responsibility to validation (remove ``clean`` method support)
@@ -14,26 +14,25 @@ Changes
 * Return generator on ``simple_model.builder.model_many_builder`` instead of list
 * Fix model conversion on fields defined as ``list`` type
 * Fix setup.py path handling
-* TODO Improve docs
 
 
-1.1.5 / 2018-05-03
+1.1.5 / 2018-03-05
 ==================
 
 * Fix fields to be mandatory by default as designed / stated in docs
 
-1.1.4 / 2018-05-03
+1.1.4 / 2018-03-05
 ==================
 
 * Fix ``Model.clean()``: call model validate after model cleaning instead of field validate after field cleaning
 
-1.1.3 / 2018-27-02
+1.1.3 / 2018-02-27
 ==================
 
 * Fix ``model_many_builder`` to stop raising errors when empty iterable is received as argument
 
 
-1.1.2 / 2018-21-02
+1.1.2 / 2018-02-21
 ==================
 
 * Fix field conversion to only happen when value is not None
@@ -41,13 +40,13 @@ Changes
 * Fix model fields to stop including some methods and properties
 
 
-1.1.1 / 2018-15-02
+1.1.1 / 2018-02-15
 ==================
 
 * Fix attribute default value as function so when the model receives the field value the default value is ignored
 
 
-1.1.0 / 2018-15-02
+1.1.0 / 2018-02-15
 ==================
 
 * Fix ``setup.py`` ``long_description``
