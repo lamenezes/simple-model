@@ -2,6 +2,12 @@
 Changes
 =======
 
+2.0.1 / 2018-04-10
+==================
+
+* Fix setup path handling when extracting version from changelog file
+
+
 2.0.0 / 2018-04-10
 ==================
 
