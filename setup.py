@@ -1,13 +1,12 @@
 import os
 import sys
-from pathlib import Path
 from shutil import rmtree
 
 from setuptools import setup, find_packages, Command
 from simple_model.__version__ import __version__
 
-here = Path(__file__).absolute().parent
-with open(here / 'README.rst') as f:
+here = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(here, 'README.rst')) as f:
     readme = '\n' + f.read()
 
 
@@ -69,5 +68,4 @@ setup(
     cmdclass={
         'upload': UploadCommand,
     },
-    include_package_data=True,
 )
