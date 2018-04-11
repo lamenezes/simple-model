@@ -69,4 +69,5 @@ setup(
     cmdclass={
         'upload': UploadCommand,
     },
+    include_package_data=True,
 )
