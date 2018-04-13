@@ -2,10 +2,17 @@
 Changes
 =======
 
+2.0.3 / 2018-04-13
+==================
+
+* Use os.path instead of Pathlib on setup
+
+
 2.0.2 / 2018-04-10
 ==================
 
 * Fix version extraction
+
 
 2.0.1 / 2018-04-10
 ==================
