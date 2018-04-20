@@ -61,7 +61,7 @@ def model_many_builder(
         return
 
     first = data[0]
-    cls = model_class_builder(class_name, first)
+    cls = cls or model_class_builder(class_name, first)
     for element in data:
         model = model_builder(
             data=element,

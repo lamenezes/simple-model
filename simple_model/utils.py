@@ -33,7 +33,7 @@ def is_not_special_object(obj):
         inspect.isgeneratorfunction(obj),
         inspect.isgenerator(obj),
         inspect.isroutine(obj),
-        isinstance(obj, property)
+        isinstance(obj, property),
     ))
 
 

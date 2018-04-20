@@ -144,3 +144,17 @@ def test_model_many_builder_empty_iterable(iterable):
 
     assert isinstance(models, typing.Generator)
     assert len(list(models)) == 0
+
+
+def test_model_many_builder_custom_cls():
+    class Foo(Model):
+        bar: str
+
+        def baz(self):
+            return True
+
+    data = [{'bar': 1}] * 3
+    models = list(model_many_builder(data, cls=Foo))
+
+    assert len(models) == 3
+    assert all(foo.baz() for foo in models)
