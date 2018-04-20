@@ -2,6 +2,12 @@
 Changes
 =======
 
+2.0.4 / 2018-04-19
+==================
+
+* Fix model_many_builder properly using cls argument
+
+
 2.0.3 / 2018-04-13
 ==================
 
