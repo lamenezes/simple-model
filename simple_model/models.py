@@ -73,11 +73,7 @@ class Model(metaclass=BaseModel):
             factory = default if isinstance(default, Callable) else None
             field_value = factory() if factory and not field_value else kwargs.get(field_name, default)
 
-            try:
-                setattr(self, field_name, field_value)
-            except AttributeError:
-                if not descriptor.is_property:
-                    raise
+            setattr(self, field_name, field_value)
 
         self.__post_init__(**kwargs)
 
@@ -115,6 +111,14 @@ class Model(metaclass=BaseModel):
         )
         return '{class_name}({attrs})'.format(class_name=type(self).__name__, attrs=attrs)
 
+    def __setattr__(self, name, value):
+        try:
+            super().__setattr__(name, value)
+        except AttributeError:
+            descriptor = self._meta.descriptors.get(name)
+            if descriptor and not descriptor.is_property:
+                raise
+
     def _get_fields(self) -> Iterator[Tuple[str, Any, ModelField]]:
         return (
             (field_name, getattr(self, field_name), self._meta.descriptors[field_name])  # type: ignore
@@ -143,6 +147,7 @@ class Model(metaclass=BaseModel):
         for name, value, descriptor in self._get_fields():
             if descriptor.is_property:
                 continue
+
             new_value = descriptor.convert_to_type(self, value)
             setattr(self, name, new_value)
 
@@ -157,9 +162,6 @@ class Model(metaclass=BaseModel):
                 if raise_exception:
                     raise
                 return False
-
-            if descriptor.is_property:
-                continue
 
             setattr(self, name, value)
 

@@ -565,12 +565,28 @@ def test_model_property_getter():
         def c(self):
             return self.a + self.b
 
+        @property
+        def d(self):
+            return 0
+
+        def validate_c(self, c):
+            if c < 0:
+                raise ValidationError()
+            return c
+
     a, b = 1.5, 2.7
 
     foo = Foo(a=a, b=b)
+    foo.validate()
 
     assert foo.c == a + b
     assert 'c' in foo._meta.fields
+    assert foo.d == 0
+    assert 'd' not in foo._meta.fields
+
+    foo = Foo(a=-1, b=-1)
+    with pytest.raises(ValidationError):
+        foo.validate()
 
 
 def test_model_property_setter():
@@ -588,17 +604,35 @@ def test_model_property_setter():
                 value = ', '.join(d.keys())
             self._d = value
 
-    foo = Foo(d={'a': 1, 'b': 2})
+        def validate_d(self, d):
+            if len(d) < 2:
+                raise ValidationError()
 
+            d += '.'
+            return d
+
+    foo = Foo(d={'a': 1, 'b': 2})
     assert foo._d == foo.d == 'a, b'
 
+    foo.validate()
+    assert foo._d == foo.d == 'a, b.'
 
-@mock.patch('simple_model.models.setattr')
-def test_model_property_setter_attribute_error(mock_setattr):
-    mock_setattr.side_effect = AttributeError
+    foo.d = {'c': 3, 'd': 4}
+    assert foo._d == foo.d == 'c, d'
 
+    foo.validate()
+    assert foo._d == foo.d == 'c, d.'
+
+    foo = Foo(d={})
+    with pytest.raises(ValidationError):
+        foo.validate()
+
+
+def test_model_property_setter_attribute_error():
     class Foo(Model):
         a: str
 
-    with pytest.raises(AttributeError):
-        Foo(a=1)
+    with mock.patch('simple_model.models.super') as mock_super:
+        mock_super.side_effect = AttributeError
+        with pytest.raises(AttributeError):
+            Foo(a=1)
