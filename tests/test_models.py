@@ -99,14 +99,6 @@ def test_base_model(model):
     assert model.bar == 'bar'
 
 
-@pytest.mark.skip(reason="iter is broken and will be removed on version 2")
-def test_base_model_iter(model_clean_validate_foo):
-    model_clean_validate_foo.foo = ' foo '
-
-    for k, v in model_clean_validate_foo:
-        assert k == v
-
-
 def test_base_model_repr(model_clean_validate_foo):
     assert type(model_clean_validate_foo).__name__ in repr(model_clean_validate_foo)
     assert "foo='foo'" in repr(model_clean_validate_foo)
