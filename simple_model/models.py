@@ -12,7 +12,7 @@ class BaseModel(type):
     @classmethod
     def _get_class_attributes(cls, new_class, parents):
         attrs = set(
-            k for k, v in new_class.__dict__.items()
+            k for k, v in vars(new_class).items()
             if not (k[:2] == '__' and k[-2:] == '__') and is_not_special_object(v)
         )
 
