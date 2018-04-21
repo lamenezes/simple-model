@@ -398,24 +398,24 @@ def test_model_inheritance_with_meta_fields(model_clean_validate_foo):
 
 def test_model_inheritance_without_meta_fields():
     class SuperModel(Model):
-        foo: str
+        foo: str = 'fooz'
         bar: str
+        baz: str = ''
 
     class SubModel(SuperModel):
         foo: str = ''
         bar: int
-        baz: str
         qux: str
 
     model = SubModel(
         bar=10,
-        baz='baz',
         qux='qux',
     )
     model.validate()
 
+    assert model.foo == ''
     assert model.bar
-    assert model.baz
+    assert model.baz == ''
     assert model.qux
 
 
@@ -525,18 +525,18 @@ def test_model_validate_and_clean_type_conversion(model):
     assert isinstance(model.any, Foo)
     assert isinstance(model.iterable, list)
     assert model.iterable == iterable
-    assert isinstance(model.model, TypedModel.model.type)
+    assert isinstance(model.model, TypedModel._meta.descriptors['model'].type)
     assert isinstance(model.models, list)
     for elem in model.models:
-        assert isinstance(elem, TypedModel.models.type.__args__[0])
-    assert isinstance(model.number, TypedModel.number.type)
+        assert isinstance(elem, TypedModel._meta.descriptors['models'].type.__args__[0])
+    assert isinstance(model.number, TypedModel._meta.descriptors['number'].type)
     assert isinstance(model.numbers, list)
     for elem in model.numbers:
-        assert isinstance(elem, TypedModel.numbers.type.__args__[0])
-    assert isinstance(model.string, TypedModel.string.type)
+        assert isinstance(elem, TypedModel._meta.descriptors['numbers'].type.__args__[0])
+    assert isinstance(model.string, TypedModel._meta.descriptors['string'].type)
     assert isinstance(model.strings, tuple)
     for elem in model.strings:
-        assert isinstance(elem, TypedModel.strings.type.__args__[0])
+        assert isinstance(elem, TypedModel._meta.descriptors['strings'].type.__args__[0])
     assert model.string_none is None
 
 
@@ -561,3 +561,21 @@ def test_field_conversion_list(model):
     model.convert_fields()
 
     assert model.elements == list(iterable)
+
+
+def test_model_property():
+    class Foo(Model):
+        a: float
+        b: float
+        c: float
+
+        @property
+        def c(self):
+            return self.a + self.b
+
+    a, b = 1.5, 2.7
+
+    foo = Foo(a=a, b=b)
+
+    assert foo.c == a + b
+    assert 'c' in foo._meta.fields

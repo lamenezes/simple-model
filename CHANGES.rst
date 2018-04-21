@@ -2,6 +2,12 @@
 Changes
 =======
 
+2.1.0 / 2018-04-XX
+==================
+
+* Add support to property (read-only) as model fields
+* Move ModeField relation to Model from class attributes to Meta
+
 2.0.4 / 2018-04-19
 ==================
 

@@ -1,6 +1,6 @@
 import pytest
 
-from simple_model import to_dict
+from simple_model import Model, to_dict
 
 
 def test_model_to_dict_invalid_argument():
@@ -40,3 +40,23 @@ def test_model_to_dict_nested_list(iterable, model, model2):
         'qux': None
     }
     assert as_dict == expected
+
+
+def test_model_to_dict_property():
+    class Foo(Model):
+        a: float
+        b: float
+
+        @property
+        def b(self):
+            return self.a + 0.1
+
+    a = 1.0
+    expected = {
+        'a': a,
+        'b': a + 0.1,
+    }
+    model = Foo(a=a)
+    model.validate()
+
+    assert to_dict(model) == expected

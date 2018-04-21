@@ -13,6 +13,7 @@ class ModelField:
         self.name = name
         self._default_value = default_value
         self.type = type
+        self.is_property = isinstance(getattr(model_class, name, None), property)
 
         try:
             self._validate = getattr(model_class, 'validate_{}'.format(name))
@@ -25,7 +26,7 @@ class ModelField:
 
     def convert_to_type(self, instance, value, field_type=None):
         field_type = field_type or self.type
-        if not field_type or field_type is Any or value is None:
+        if not field_type or field_type is Any or value is None or self.is_property:
             return value
 
         if not issubclass(field_type, PARAMETRIZED_GENERICS) and type(value) is field_type:

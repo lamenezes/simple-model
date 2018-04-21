@@ -43,19 +43,18 @@ class BaseModel(type):
         attrs = cls._get_class_attributes(new_class, parents)
         assert hints or attrs, '{} model must define class attributes'.format(new_class.__name__)
         meta.fields = cls._get_fields(attrs, hints)
+        meta.descriptors = {}
 
         for field_name in meta.fields:
             field_type = hints.get(field_name) if hints else None
             default_value = getattr(new_class, field_name, Unset)
-            if isinstance(default_value, ModelField):
-                default_value = default_value.default_value
             field = ModelField(
                 model_class=new_class,
                 name=field_name,
                 default_value=default_value,
                 type=field_type,
             )
-            setattr(new_class, field_name, field)
+            meta.descriptors[field_name] = field
 
         new_class._meta = meta
 
@@ -67,7 +66,10 @@ class Model(metaclass=BaseModel):
         self._validation_count = 0
 
         for field_name in self._meta.fields:
-            descriptor = getattr(type(self), field_name)
+            descriptor = self._meta.descriptors[field_name]
+            if descriptor.is_property:
+                continue
+
             field_value = kwargs.get(field_name)
             default = descriptor.default_value
             factory = default if isinstance(default, Callable) else None
@@ -111,9 +113,8 @@ class Model(metaclass=BaseModel):
         return '{class_name}({attrs})'.format(class_name=type(self).__name__, attrs=attrs)
 
     def _get_fields(self) -> Iterator[Tuple[str, Any, ModelField]]:
-        cls = type(self)
         return (
-            (field_name, getattr(self, field_name), getattr(cls, field_name))
+            (field_name, getattr(self, field_name), self._meta.descriptors[field_name])
             for field_name in self._meta.fields  # type: ignore
         )
 
@@ -137,6 +138,8 @@ class Model(metaclass=BaseModel):
 
     def convert_fields(self):
         for name, value, descriptor in self._get_fields():
+            if descriptor.is_property:
+                continue
             new_value = descriptor.convert_to_type(self, value)
             setattr(self, name, new_value)
 
@@ -151,7 +154,10 @@ class Model(metaclass=BaseModel):
                 if raise_exception:
                     raise
                 return False
-            else:
-                setattr(self, name, value)
+
+            if descriptor.is_property:
+                continue
+
+            setattr(self, name, value)
 
         return None if raise_exception else True
