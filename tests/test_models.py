@@ -563,7 +563,7 @@ def test_field_conversion_list(model):
     assert model.elements == list(iterable)
 
 
-def test_model_property():
+def test_model_property_getter():
     class Foo(Model):
         a: float
         b: float
@@ -579,3 +579,34 @@ def test_model_property():
 
     assert foo.c == a + b
     assert 'c' in foo._meta.fields
+
+
+def test_model_property_setter():
+    class Foo(Model):
+        d: str
+
+        @property
+        def d(self):
+            return str(self._d)
+
+        @d.setter
+        def d(self, d):
+            value = d
+            if isinstance(d, dict):
+                value = ', '.join(d.keys())
+            self._d = value
+
+    foo = Foo(d={'a': 1, 'b': 2})
+
+    assert foo._d == foo.d == 'a, b'
+
+
+@mock.patch('simple_model.models.setattr')
+def test_model_property_setter_attribute_error(mock_setattr):
+    mock_setattr.side_effect = AttributeError
+
+    class Foo(Model):
+        a: str
+
+    with pytest.raises(AttributeError):
+        Foo(a=1)
