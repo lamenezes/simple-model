@@ -14,6 +14,7 @@ Changes
 * Add support to property (getter and setter) as model fields
 * Move ModeField relation to Model from class attributes to Meta
 
+
 2.0.4 / 2018-04-19
 ==================
 
@@ -57,10 +58,12 @@ Changes
 
 * Fix fields to be mandatory by default as designed / stated in docs
 
+
 1.1.4 / 2018-03-05
 ==================
 
 * Fix ``Model.clean()``: call model validate after model cleaning instead of field validate after field cleaning
+
 
 1.1.3 / 2018-02-27
 ==================
@@ -129,6 +132,7 @@ Changes
 
 * Add ``model_many_builder()``. It builds lists of models from data lists
 * Fix travis config
+
 
 0.13.0 / 2017-11-21
 ===================
