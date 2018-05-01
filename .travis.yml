@@ -5,8 +5,8 @@ python:
 
 install:
     - pip install pipenv
-    - pipenv install --dev --system
-    - pipenv install coveralls --system
+    - pipenv install --dev
+    - pipenv install coveralls
 
 before_script:
     - pipenv run flake8 --ignore=E501 simple_model
