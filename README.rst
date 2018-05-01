@@ -112,7 +112,7 @@ Now let's test it:
     >> person = Person(name='Jane Doe', is_active=False)
     >> person.is_active
     False
-    >> person.validate(raise_exception=False)
+    >> person.validate()
     True
 
 The last line won't raise an exception which means the model instance is valid!
@@ -161,7 +161,7 @@ Let's test it:
 
 
 It is important to note that models don't validate types. Currently types are used
-for field value conversion. This is going to be explained later.
+for field value conversion.
 
 Simple model also supports cleaning the field values by defining custom methods
 named `clean_` followed by the attribute name:
@@ -187,12 +187,11 @@ named `clean_` followed by the attribute name:
     18  # converted from float (18.0) to int (18)
 
 
-Finally, simple model allows you to easily convert your model to dict type using python
-built-in function `dict()`:
+Finally, simple model allows you to easily convert your model to dict type using the function `to_dict()`:
 
 .. code:: python
 
-    >>> dict(person)
+    >>> to_dict(person)
     {
         'age': 18,
         'name': 'John Doe'
