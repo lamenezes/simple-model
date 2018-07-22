@@ -4,16 +4,11 @@ python:
   - "3.6"
 
 install:
-    - pip install pipenv
-    - pipenv install --dev
-    - pipenv install coveralls
-
-before_script:
-    - pipenv run flake8 --ignore=E501 simple_model
+    - pip install tox
+    - pip install coveralls
 
 script:
-    - pipenv run py.test
-    - pipenv run mypy simple_model
+    - tox
 
 after_script:
-    - pipenv run coveralls
+    - coveralls
