@@ -1,11 +1,15 @@
 language: python
 
+python:
+  - "3.6"
+  - "3.7-dev"
+
 install:
-    - pip install tox
-    - pip install coveralls
+  - pip install tox
+  - pip install coveralls
 
 script:
-    - tox
+  - tox
 
 after_script:
-    - coveralls
+  - coveralls
