@@ -123,9 +123,9 @@ def test_model_field_convert_to_type_unset(typeless_model_field):
     typeless_model_field.type = typing.Any
     assert typeless_model_field.convert_to_type(None, value) is value
 
-    assert typeless_model_field.convert_to_type(None, value, field_type=None) is value
+    assert typeless_model_field.convert_to_type(None, value, field_class=None) is value
 
-    assert typeless_model_field.convert_to_type(None, value, field_type=typing.Any) is value
+    assert typeless_model_field.convert_to_type(None, value, field_class=typing.Any) is value
 
 
 def test_model_field_convert_to_type_value_has_correct_type(model_field):

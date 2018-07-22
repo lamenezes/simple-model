@@ -24,41 +24,49 @@ class ModelField:
     def default_value(self):
         return self._default_value if self._default_value is not Unset else None
 
-    def convert_to_type(self, instance, value, field_type=None):
-        field_type = field_type or self.type
-        if not field_type or field_type is Any or value is None or self.is_property:
+    def _split_class_and_type(self, type_):
+        try:
+            return type_.__origin__, type_
+        except AttributeError:
+            return type_, None
+
+    def convert_to_type(self, instance, value, field_class=None):
+        field_class = field_class or self.type
+        field_class, field_type = self._split_class_and_type(field_class)
+
+        if not field_class or field_class is Any or value is None or self.is_property:
             return value
 
-        if not issubclass(field_type, PARAMETRIZED_GENERICS) and type(value) is field_type:
+        if not issubclass(field_class, PARAMETRIZED_GENERICS) and type(value) is field_class:
             return value
 
         from simple_model.models import Model
-        if issubclass(field_type, Model) and isinstance(value, Model):
-            assert type(value) is field_type, ('Field of type {} received an object of invalid '
-                                               'type {}').format(field_type, type(value))
+        if issubclass(field_class, Model) and isinstance(value, Model):
+            assert type(value) is field_class, ('Field of type {} received an object of invalid '
+                                                'type {}').format(field_class, type(value))
 
-        if issubclass(field_type, Model):
-            return field_type(**value)
+        if issubclass(field_class, Model):
+            return field_class(**value)
 
-        if issubclass(field_type, (list, tuple)):
+        if issubclass(field_class, (list, tuple)):
             try:
-                element_field_type = field_type.__args__[0] if field_type.__args__ else None
+                element_field_class = field_type.__args__[0] if field_type.__args__ else None
             except AttributeError:
-                element_field_type = None
+                element_field_class = None
 
-            iterable_field_type = tuple if issubclass(field_type, tuple) else list
-            if not element_field_type:
-                return iterable_field_type(value)
+            iterable_field_class = tuple if issubclass(field_class, tuple) else list
+            if not element_field_class:
+                return iterable_field_class(value)
 
             values = []
             for elem in value:
-                if not isinstance(elem, element_field_type):
-                    elem = self.convert_to_type(instance, elem, field_type=element_field_type)
+                if not isinstance(elem, element_field_class):
+                    elem = self.convert_to_type(instance, elem, field_class=element_field_class)
                 values.append(elem)
 
-            return iterable_field_type(values)
+            return iterable_field_class(values)
 
-        return field_type(value)
+        return field_class(value)
 
     def validate(self, instance, value):
         if self._default_value is Unset and self.model_class.is_empty(value):
