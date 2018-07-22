@@ -3,9 +3,9 @@ Simple Model
 ============
 
 .. image:: https://badge.fury.io/py/pysimplemodel.svg
-    :target: https://github.com/lamenezes/simple-model
+    :target: https://pypi.org/project/pysimplemodel/
 
-.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+.. image:: https://img.shields.io/badge/python-3.6,3.7-blue.svg
     :target: https://github.com/lamenezes/simple-model
 
 .. image:: https://img.shields.io/github/license/lamenezes/simple-model.svg
