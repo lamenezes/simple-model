@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, TypeVar
 
 from .exceptions import EmptyField
 
@@ -52,6 +52,15 @@ class ModelField:
             try:
                 element_field_class = field_type.__args__[0] if field_type.__args__ else None
             except AttributeError:
+                element_field_class = None
+
+            # if iterable value is a type var refrain from casting to avoid converting to a type
+            # the user may not want , e.g.
+            # T = TypeVar('T', str, bytes)
+            # class Model:
+            #    t: T
+            # what's the correct type to convert here? str? bytes? for now there's no conversion
+            if isinstance(element_field_class, TypeVar):
                 element_field_class = None
 
             iterable_field_class = tuple if issubclass(field_class, tuple) else list
