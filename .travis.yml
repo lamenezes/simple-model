@@ -2,7 +2,7 @@ language: python
 
 python:
   - "3.6"
-  - "3.7-dev"
+# - "3.7" uncomment when travis fix py37 issues
 
 install:
   - pip install tox
