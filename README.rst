@@ -11,11 +11,11 @@ Simple Model
 .. image:: https://img.shields.io/github/license/lamenezes/simple-model.svg
     :target: https://github.com/lamenezes/simple-model/blob/master/LICENSE
 
-.. image:: https://travis-ci.org/lamenezes/simple-model.svg?branch=master
-    :target: https://travis-ci.org/lamenezes/simple-model
+.. image:: https://circleci.com/gh/lamenezes/simple-model.svg?style=shield
+    :target: https://circleci.com/gh/lamenezes/simple-model
 
-.. image:: https://coveralls.io/repos/github/lamenezes/simple-model/badge.svg?branch=master
-    :target: https://coveralls.io/github/lamenezes/simple-model?branch=master
+.. image:: https://codecov.io/gh/lamenezes/simple-model/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/lamenezes/simple-model
 
 
 *SimpleModel* offers a simple way to handle data using classes instead of a
