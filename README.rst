@@ -138,10 +138,14 @@ followed by the attribute name, e.g.
         def validate_age(self, age):
             if age < 0 or age > 150:
                 raise ValidationError('Invalid value for age {!r}'.format(age))
+            
+            return age
 
         def validate_height(self, height):
             if height <= 0:
                raise ValidationError('Invalid value for height {!r}'.format(age))
+            
+            return height
 
 
 Let's test it:
