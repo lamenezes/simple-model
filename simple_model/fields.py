@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple, TypeVar
+from typing import Any, List, Union, Tuple, TypeVar
 
 from .exceptions import EmptyField
 
@@ -35,6 +35,13 @@ class ModelField:
         field_class, field_type = self._split_class_and_type(field_class)
 
         if not field_class or field_class is Any or value is None or self.is_property:
+            return value
+
+        if field_class is Union:
+            assert issubclass(type(value), field_type.__args__), (
+                'Field of type {} received an object of invalid type {}').format(
+                    field_type.__args__, type(value))
+
             return value
 
         if not issubclass(field_class, PARAMETRIZED_GENERICS) and type(value) is field_class:

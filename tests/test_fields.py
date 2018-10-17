@@ -128,6 +128,19 @@ def test_model_field_convert_to_type_unset(typeless_model_field):
     assert typeless_model_field.convert_to_type(None, value, field_class=typing.Any) is value
 
 
+@pytest.mark.parametrize('value', (1, '1'))
+def test_model_field_convert_to_type_union(typeless_model_field, value):
+    assert typeless_model_field.convert_to_type(None, value, field_class=typing.Union[int, str]) is value
+
+
+def test_model_field_convert_to_type_union_invalid(typeless_model_field):
+    value = dict()
+    with pytest.raises(AssertionError) as exc_info:
+        typeless_model_field.convert_to_type(None, value, field_class=typing.Union[int, str])
+
+    assert str(exc_info.value) == "Field of type (<class 'int'>, <class 'str'>) received an object of invalid type <class 'dict'>"
+
+
 def test_model_field_convert_to_type_value_has_correct_type(model_field):
     value = 'valuable'
 

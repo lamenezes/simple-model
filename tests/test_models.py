@@ -427,6 +427,17 @@ def test_field_factory_model():
     assert model.string == 'foobar'
 
 
+@pytest.mark.parametrize('default', ('1', 1))
+def test_model_validate_union(default):
+    class UnionModel(Model):
+        union: typing.Union[int, str] = default
+
+    union_model = UnionModel()
+    union_model.validate()
+    assert union_model.union == default
+    assert type(union_model.union) == type(default)
+
+
 def test_model_validate_and_clean_invalid_mocked_model(model):
     model.validate = mock.Mock(side_effect=ValidationError)
 
