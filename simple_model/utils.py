@@ -2,6 +2,8 @@ import inspect
 import re
 import typing
 
+_PRIVATE_ATTR_RE = re.compile(r'_[\w\d]+__[\w\d]')
+
 
 def capitalize_first(string: str) -> str:
     return string[0].upper() + string[1:] if string != '' else string
@@ -45,3 +47,7 @@ def remove_private_keys(d: dict) -> dict:
     return {
         k: v for k, v in d.items() if not k.startswith('__')
     }
+
+
+def is_private_attribute(name):
+    return _PRIVATE_ATTR_RE.match(name) is not None

@@ -1,6 +1,13 @@
 import pytest
 
-from simple_model.utils import camel_case, capitalize_first, coerce_to_alpha, getkey, snake_case, remove_private_keys
+from simple_model.utils import (
+    camel_case,
+    capitalize_first,
+    coerce_to_alpha,
+    getkey,
+    is_private_attribute,
+    snake_case,
+)
 
 
 def test_utils_capitalize_first():
@@ -40,12 +47,11 @@ def test_getkey():
         getkey(d, 'toba')
 
 
-def test_remove_private_keys():
-    d = {
-        'public': 'public',
-        '_protected': '_protected',
-        '__private': '__private',
-        '___what': '___what',
-    }
-
-    assert list(remove_private_keys(d)) == ['public', '_protected']
+@pytest.mark.parametrize('attr_name, result', (
+    ('_Foo__bar', True),
+    ('_MyModel__attr', True),
+    ('bar', False),
+    ('__bar', False),
+))
+def test_is_private_attribute(attr_name, result):
+    assert is_private_attribute(attr_name) is result

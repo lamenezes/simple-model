@@ -669,3 +669,22 @@ def test_model_property_setter_attribute_error():
         mock_super.side_effect = AttributeError
         with pytest.raises(AttributeError):
             Foo(a=1)
+
+
+def test_model_ignores_private_attrs():
+    class PrivateModel(Model):
+        pub: int
+        _protected: str
+        __private = None
+        __another_private: str
+
+    model = PrivateModel(pub=1, _protected='bar')
+
+    assert '_PrivateModel__private' not in model._meta.fields
+    assert '_PrivateModel__another_private' not in model._meta.fields
+    assert model.validate(raise_exception=False) is True
+    assert model.pub
+    assert model._protected
+    assert model._PrivateModel__private is None
+    with pytest.raises(AttributeError):
+        model._PrivateModel__another_private

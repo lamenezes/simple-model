@@ -3,7 +3,7 @@ from typing import Any, Callable, Iterable, Iterator, Tuple, Union
 
 from .exceptions import ValidationError
 from .fields import ModelField, Unset
-from .utils import is_not_special_object, getkey
+from .utils import is_not_special_object, is_private_attribute, getkey
 
 
 class BaseModel(type):
@@ -13,7 +13,7 @@ class BaseModel(type):
     def _get_class_attributes(cls, new_class, parents):
         attrs = set(
             k for k, v in vars(new_class).items()
-            if not (k[:2] == '__' and k[-2:] == '__') and is_not_special_object(v)
+            if not (k[:2] == '__' and k[-2:] == '__') and is_not_special_object(v) and not is_private_attribute(k)
         )
 
         if not parents:
@@ -25,7 +25,7 @@ class BaseModel(type):
     def _get_fields(cls, attrs, hints):
         fields = set(hints) | attrs
         fields.discard('Meta')
-        return tuple(fields)
+        return tuple(field for field in fields if not is_private_attribute(field))
 
     def __new__(cls, name, bases, attrs, **kwargs):
         super_new = super().__new__
