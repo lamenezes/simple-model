@@ -2,10 +2,18 @@
 Changes
 =======
 
+2.2.0 / 2018-10-23
+==================
+
+* Remove "private" attributes (e.g. `Foo.__bar`) from model fields. Thanks @georgeyk
+* Support typing.Union on field definitions. Thanks @daneoshiga.
+
+
 2.1.2 / 2018-07-22
 ==================
 
 * Add support to Python 3.7 support.
+
 
 2.1.1 / 2018-04-21
 ==================
