@@ -1,6 +1,6 @@
 import pytest
 
-from simple_model.utils import camel_case, capitalize_first, coerce_to_alpha, getkey, snake_case
+from simple_model.utils import camel_case, capitalize_first, coerce_to_alpha, getkey, snake_case, remove_private_keys
 
 
 def test_utils_capitalize_first():
@@ -38,3 +38,14 @@ def test_getkey():
 
     with pytest.raises(KeyError):
         getkey(d, 'toba')
+
+
+def test_remove_private_keys():
+    d = {
+        'public': 'public',
+        '_protected': '_protected',
+        '__private': '__private',
+        '___what': '___what',
+    }
+
+    assert list(remove_private_keys(d)) == ['public', '_protected']

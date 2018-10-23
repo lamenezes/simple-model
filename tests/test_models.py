@@ -317,6 +317,28 @@ def test_model_get_fields_invalid():
     assert 'model must define class attributes' in str(exc)
 
 
+def test_model_with_private_attrs():
+    class PvtModel(Model):
+        foo = 'foo'
+        _cotuba = 'cotuba'
+        __bar = 'bar'
+
+        def __len__(self):
+            return 42
+
+        def __private_method(self):
+            pass
+
+    model = PvtModel()
+    model.validate()
+
+    assert model.foo == 'foo'
+    assert model._cotuba == 'cotuba'
+    assert len(model) == 42
+    assert hasattr(model, '__bar') is False
+    assert hasattr(model, '__private_method') is False
+
+
 def test_build_many(many_source):
     models = MyModel.build_many(many_source)
 

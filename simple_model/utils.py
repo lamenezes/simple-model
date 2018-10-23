@@ -39,3 +39,9 @@ def is_not_special_object(obj):
 
 def getkey(d: dict, key: typing.Any):
     return d[key]
+
+
+def remove_private_keys(d: dict) -> dict:
+    return {
+        k: v for k, v in d.items() if not k.startswith('__')
+    }

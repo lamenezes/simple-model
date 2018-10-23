@@ -108,6 +108,18 @@ def test_model_builder_data_keys_with_special_characters():
     assert birl.baz_qux == 'bazqux'
 
 
+def test_model_builder_ignore_private_attrs():
+    data = {
+        'foo': 'foo',
+        '_bar': 'bar',
+        '__nope': 'nope',
+    }
+    birl = model_builder(data)
+    assert birl.foo == 'foo'
+    assert birl._bar == 'bar'
+    assert hasattr(birl, '__nope') is False
+
+
 def test_model_builder_custom_class():
     data = {
         'foo*bar': 'foobar',
@@ -136,6 +148,24 @@ def test_model_many_builder():
     first = models[0]
     for model in models[1:]:
         assert isinstance(model, type(first))
+
+
+def test_model_many_builder_ignore_private_attrs():
+    element = {
+        'foo': 'foo',
+        '_bar': 'bar',
+        '__nope': 'nope',
+    }
+    model_count = 3
+    data = [element] * model_count
+
+    models = list(model_many_builder(data))
+
+    assert len(models) == model_count
+    for model in models:
+        assert model.foo == 'foo'
+        assert model._bar == 'bar'
+        assert hasattr(model, '__nope') is False
 
 
 @pytest.mark.parametrize('iterable', ([], ()))

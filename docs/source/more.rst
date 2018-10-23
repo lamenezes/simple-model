@@ -55,6 +55,14 @@ provide a default value for each field by setting values on each field on the
 model class.
 
 
+**Note:**
+
+    Attributes and methods that starts with "__" (dunder) are considered private
+    and not included in model.
+
+    For a better understanding, check this `python underscore convention`_ link.
+
+
 Defining fields without explicit types
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -122,3 +130,4 @@ TBD
 
 
 .. _`type hints`: https://www.python.org/dev/peps/pep-0484/#type-definition-syntax
+.. _`python underscore convention`: https://dbader.org/blog/meaning-of-underscores-in-python

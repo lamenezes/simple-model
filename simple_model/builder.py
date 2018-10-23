@@ -1,14 +1,14 @@
 from typing import Any, Generator
 
 from .models import Model
-from .utils import camel_case, coerce_to_alpha, snake_case
+from .utils import camel_case, coerce_to_alpha, snake_case, remove_private_keys
 
 
 def model_class_builder(class_name: str, data: Any) -> type:
     keys = data.keys() or ('',)
     attrs = {key: None for key in keys}
     attrs['__annotations__'] = {key: Any for key in keys}  # type: ignore
-    new_class = type(class_name, (Model,), attrs)
+    new_class = type(class_name, (Model,), remove_private_keys(attrs))
     return new_class
 
 
@@ -27,7 +27,7 @@ def model_builder(
     data = {func(key): value for key, value in data.items() for func in clean_funcs}
     if not cls:
         cls = model_class_builder(class_name, data)
-    instance = cls(**data)
+    instance = cls(**remove_private_keys(data))
 
     if not recurse:
         return instance
