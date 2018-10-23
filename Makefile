@@ -23,8 +23,8 @@ docs:
 	cd docs && make html
 
 test:
-	pipenv run py.test tests/ --cov simple_model
-	pipenv run mypy simple_model
+	pytest tests/ --cov simple_model
+	mypy simple_model
 
 release:
 	python setup.py upload
