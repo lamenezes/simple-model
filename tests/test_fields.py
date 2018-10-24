@@ -133,6 +133,11 @@ def test_model_field_convert_to_type_union(typeless_model_field, value):
     assert typeless_model_field.convert_to_type(None, value, field_class=typing.Union[int, str]) is value
 
 
+@pytest.mark.parametrize('value', (1, None))
+def test_model_field_convert_to_type_optional(typeless_model_field, value):
+    assert typeless_model_field.convert_to_type(None, value, field_class=typing.Optional[int]) is value
+
+
 def test_model_field_convert_to_type_union_invalid(typeless_model_field):
     value = dict()
     with pytest.raises(AssertionError) as exc_info:

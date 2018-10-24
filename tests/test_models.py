@@ -460,6 +460,17 @@ def test_model_validate_union(default):
     assert type(union_model.union) == type(default)
 
 
+@pytest.mark.parametrize('default', (1, None))
+def test_model_validate_optional(default):
+    class OptionalModel(Model):
+        union: typing.Optional[int] = default
+
+    optional_model = OptionalModel()
+    optional_model.validate()
+    assert optional_model.union == default
+    assert type(optional_model.union) == type(default)
+
+
 def test_model_validate_and_clean_invalid_mocked_model(model):
     model.validate = mock.Mock(side_effect=ValidationError)
 
