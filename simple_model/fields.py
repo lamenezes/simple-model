@@ -12,7 +12,7 @@ class ModelField:
         self.model_class = model_class
         self.name = name
         self._default_value = default_value
-        self.type = type
+        self._type = type
         self.is_property = isinstance(getattr(model_class, name, None), property)
 
         try:
@@ -20,9 +20,24 @@ class ModelField:
         except AttributeError:
             self._validate = None
 
+    def __repr__(self):
+        return (f'ModelField(model_class={self.model_class!r}, name={self.name!r}, '
+                f'default_value={self._default_value!r}, type={self._type!r})')
+
     @property
     def default_value(self):
         return self._default_value if self._default_value is not Unset else None
+
+    @property
+    def types(self):
+        try:
+            return self._type.__args__ or []
+        except AttributeError:
+            return [self._type]
+
+    @property
+    def allow_empty(self):
+        return type(None) in self.types or self._default_value is not Unset
 
     def _split_class_and_type(self, type_):
         try:
@@ -31,7 +46,7 @@ class ModelField:
             return type_, None
 
     def convert_to_type(self, instance, value, field_class=None):
-        field_class = field_class or self.type
+        field_class = field_class or self._type
         field_class, field_type = self._split_class_and_type(field_class)
 
         if not field_class or field_class is Any or value is None or self.is_property:
@@ -85,7 +100,7 @@ class ModelField:
         return field_class(value)
 
     def validate(self, instance, value):
-        if self._default_value is Unset and self.model_class.is_empty(value):
+        if not self.allow_empty and self.model_class.is_empty(value):
             raise EmptyField(self.name)
 
         if isinstance(value, (list, tuple)):

@@ -151,7 +151,7 @@ class Model(metaclass=BaseModel):
             new_value = descriptor.convert_to_type(self, value)
             setattr(self, name, new_value)
 
-    def validate(self, raise_exception: bool=True) -> Union[None, bool]:
+    def validate(self, raise_exception: bool = True) -> Union[None, bool]:
         self._validation_count += 1
         self.convert_fields()
 

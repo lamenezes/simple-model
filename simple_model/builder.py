@@ -13,8 +13,8 @@ def model_class_builder(class_name: str, data: Any) -> type:
 
 
 def model_builder(
-    data: Any, class_name: str='MyModel', cls: type=None, recurse: bool=True,
-    snake_case_keys: bool=True, alpha_keys: bool=True,
+    data: Any, class_name: str = 'MyModel', cls: type = None, recurse: bool = True,
+    snake_case_keys: bool = True, alpha_keys: bool = True,
 ) -> Model:
 
     clean_funcs = []
@@ -53,8 +53,8 @@ def model_builder(
 
 
 def model_many_builder(
-    data: list, class_name: str='MyModel', cls: type=None, recurse: bool=True,
-    snake_case_keys: bool=True, alpha_keys: bool=True,
+    data: list, class_name: str = 'MyModel', cls: type = None, recurse: bool = True,
+    snake_case_keys: bool = True, alpha_keys: bool = True,
 ) -> Generator[Model, None, None]:
 
     if len(data) == 0:

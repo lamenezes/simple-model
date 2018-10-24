@@ -34,7 +34,12 @@ def test_model_field(model_field):
     assert issubclass(model_field.model_class, Model)
     assert model_field.name == 'bar'
     assert model_field.default_value == 'default'
-    assert issubclass(str, model_field.type)
+    assert issubclass(str, model_field._type)
+
+    assert repr(model_field.name) in repr(model_field)
+    assert repr(model_field.default_value) in repr(model_field)
+    assert repr(model_field.model_class) in repr(model_field)
+    assert repr(model_field._type) in repr(model_field)
 
 
 def test_empty_model_field_default_value(empty_model_field):
@@ -120,7 +125,7 @@ def test_model_field_convert_to_type_unset(typeless_model_field):
 
     assert typeless_model_field.convert_to_type(None, value) is value
 
-    typeless_model_field.type = typing.Any
+    typeless_model_field._type = typing.Any
     assert typeless_model_field.convert_to_type(None, value) is value
 
     assert typeless_model_field.convert_to_type(None, value, field_class=None) is value
@@ -139,7 +144,7 @@ def test_model_field_convert_to_type_optional(typeless_model_field, value):
 
 
 def test_model_field_convert_to_type_union_invalid(typeless_model_field):
-    value = dict()
+    value = {}
     with pytest.raises(AssertionError) as exc_info:
         typeless_model_field.convert_to_type(None, value, field_class=typing.Union[int, str])
 
@@ -153,7 +158,7 @@ def test_model_field_convert_to_type_value_has_correct_type(model_field):
 
 
 def test_model_field_convert_to_type_invalid_model_type(model_field):
-    model_field.type = Model
+    model_field._type = Model
     value = MyModel()
 
     with pytest.raises(AssertionError):
@@ -161,7 +166,7 @@ def test_model_field_convert_to_type_invalid_model_type(model_field):
 
 
 def test_model_field_convert_to_type_model_type(model_field):
-    model_field.type = MyModel
+    model_field._type = MyModel
     value = {}
 
     model = model_field.convert_to_type(None, value)
@@ -180,7 +185,7 @@ def test_model_field_convert_to_type(model_field):
     (typing.Tuple, tuple),
 ))
 def test_model_field_convert_to_type_iterable_without_type(iterable_type, iterable_cls, model_field):
-    model_field.type = iterable_type
+    model_field._type = iterable_type
     value = iterable_cls([1, 2])
 
     assert model_field.convert_to_type(None, value) == value
@@ -191,7 +196,7 @@ def test_model_field_convert_to_type_iterable_without_type(iterable_type, iterab
     (typing.Tuple[str], tuple),
 ))
 def test_model_field_convert_to_type_iterable_typed(iterable_type, iterable_cls, model_field):
-    model_field.type = iterable_type
+    model_field._type = iterable_type
     value = iterable_cls([1, 2])
 
     assert model_field.convert_to_type(None, value) == iterable_cls(['1', '2'])
@@ -199,7 +204,7 @@ def test_model_field_convert_to_type_iterable_typed(iterable_type, iterable_cls,
 
 @pytest.mark.parametrize('iterable_type', (list, tuple))
 def test_model_field_convert_to_type_iterable_generic(iterable_type, model_field):
-    model_field.type = iterable_type
+    model_field._type = iterable_type
     value = iterable_type([1, 2])
 
     assert model_field.convert_to_type(None, value) == value
@@ -210,7 +215,15 @@ def test_model_field_convert_to_type_iterable_generic(iterable_type, model_field
     (typing.Tuple[int], tuple),
 ))
 def test_model_field_convert_to_type_iterable_same_type(iterable_type, iterable_cls, model_field):
-    model_field.type = iterable_type
+    model_field._type = iterable_type
     value = iterable_cls([1, 2])
+
+    assert model_field.convert_to_type(None, value) == value
+
+
+def test_model_field_conversion_iterable_with_type_var(model_field):
+    typevar = typing.TypeVar('typevar', bool, int)
+    model_field._type = typing.List[typevar]
+    value = ['foo']
 
     assert model_field.convert_to_type(None, value) == value

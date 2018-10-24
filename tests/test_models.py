@@ -455,20 +455,42 @@ def test_model_validate_union(default):
         union: typing.Union[int, str] = default
 
     union_model = UnionModel()
-    union_model.validate()
+
+    assert union_model.validate(raise_exception=False) is True
     assert union_model.union == default
-    assert type(union_model.union) == type(default)
+    assert isinstance(union_model.union, type(default))
 
 
 @pytest.mark.parametrize('default', (1, None))
 def test_model_validate_optional(default):
+    class OptionalDefaultModel(Model):
+        optional: typing.Optional[int] = default
+
+    optional_model = OptionalDefaultModel()
+
+    assert optional_model.validate(raise_exception=False) is True
+    assert optional_model.optional == default
+    assert isinstance(optional_model.optional, type(default))
+
+
+def test_model_validate_optional_without_default():
     class OptionalModel(Model):
-        union: typing.Optional[int] = default
+        optional: typing.Optional[int]
+
+    optional_model = OptionalModel(optional=10)
+
+    assert optional_model.validate(raise_exception=False) is True
+    assert optional_model.optional == 10
+
+
+def test_model_validate_optional_empty_without_default():
+    class OptionalModel(Model):
+        optional: typing.Optional[int]
 
     optional_model = OptionalModel()
-    optional_model.validate()
-    assert optional_model.union == default
-    assert type(optional_model.union) == type(default)
+
+    assert optional_model.validate(raise_exception=False) is True
+    assert optional_model.optional is None
 
 
 def test_model_validate_and_clean_invalid_mocked_model(model):
@@ -561,18 +583,18 @@ def test_model_validate_and_clean_type_conversion(model):
     assert isinstance(model.any, Foo)
     assert isinstance(model.iterable, list)
     assert model.iterable == iterable
-    assert isinstance(model.model, TypedModel._meta.descriptors['model'].type)
+    assert isinstance(model.model, TypedModel._meta.descriptors['model']._type)
     assert isinstance(model.models, list)
     for elem in model.models:
-        assert isinstance(elem, TypedModel._meta.descriptors['models'].type.__args__[0])
-    assert isinstance(model.number, TypedModel._meta.descriptors['number'].type)
+        assert isinstance(elem, TypedModel._meta.descriptors['models']._type.__args__[0])
+    assert isinstance(model.number, TypedModel._meta.descriptors['number']._type)
     assert isinstance(model.numbers, list)
     for elem in model.numbers:
-        assert isinstance(elem, TypedModel._meta.descriptors['numbers'].type.__args__[0])
-    assert isinstance(model.string, TypedModel._meta.descriptors['string'].type)
+        assert isinstance(elem, TypedModel._meta.descriptors['numbers']._type.__args__[0])
+    assert isinstance(model.string, TypedModel._meta.descriptors['string']._type)
     assert isinstance(model.strings, tuple)
     for elem in model.strings:
-        assert isinstance(elem, TypedModel._meta.descriptors['strings'].type.__args__[0])
+        assert isinstance(elem, TypedModel._meta.descriptors['strings']._type.__args__[0])
     assert model.string_none is None
 
 
