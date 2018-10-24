@@ -2,6 +2,13 @@
 Changes
 =======
 
+2.3.0 / 2018-10-24
+==================
+
+* Support typing.Optional on field definitions. Thanks @daneoshiga.
+* Minor performance enhancements. Thanks @daneoshiga.
+
+
 2.2.0 / 2018-10-23
 ==================
 
