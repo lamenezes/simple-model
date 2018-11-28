@@ -2,6 +2,11 @@
 Changes
 =======
 
+2.3.2 / 2018-11-28
+==================
+
+* Fix model validation to avoid accessing properties unless it's really necessary
+
 2.3.1 / 2018-11-28
 ==================
 
