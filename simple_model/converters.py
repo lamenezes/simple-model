@@ -7,7 +7,9 @@ def to_dict(model: Model):
 
     assert model._validation_count, 'model.validate() must be run before conversion'
 
-    return {
-        field: descriptor.to_python(value)
-        for field, value, descriptor in model._get_fields()
-    }
+    d = {}
+    for field_name, descriptor in model._get_fields():
+        value = getattr(model, field_name)
+        d[field_name] = descriptor.to_python(value)
+
+    return d

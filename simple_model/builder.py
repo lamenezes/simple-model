@@ -32,8 +32,8 @@ def model_builder(
     if not recurse:
         return instance
 
-    # dafuq
-    for name, value, descriptor in instance._get_fields():
+    for name, descriptor in instance._get_fields():
+        value = getattr(instance, name)
         if isinstance(value, dict):
             value = model_builder(value, camel_case(name))
         elif isinstance(value, (list, tuple)):

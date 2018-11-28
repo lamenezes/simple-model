@@ -106,9 +106,9 @@ def test_base_model_repr(model_clean_validate_foo):
 
 
 def test_base_model__get_fields(model_clean_validate_foo):
-    for name, value, descriptor in model_clean_validate_foo._get_fields():
+    for name, descriptor in model_clean_validate_foo._get_fields():
         assert name in ('foo', 'bar')
-        assert value in ('foo', 'bar')
+        assert getattr(model_clean_validate_foo, name) in ('foo', 'bar')
         assert isinstance(descriptor, ModelField)
 
 
@@ -200,9 +200,8 @@ def test_model(model):
 
 
 def test_model__get_fields(model):
-    for name, value, descriptor in model._get_fields():
+    for name, descriptor in model._get_fields():
         assert name in model._meta.fields
-        assert value == getattr(model, name)
         assert isinstance(descriptor, ModelField)
 
 
@@ -702,6 +701,40 @@ def test_model_property_setter_attribute_error():
         mock_super.side_effect = AttributeError
         with pytest.raises(AttributeError):
             Foo(a=1)
+
+
+def test_model_property_is_not_called_on_validation_unless_necessary():
+    class Foo(Model):
+        a: str
+        b: dict = dict
+
+        @property
+        def a(self):
+            return self.b.c
+
+    foo = Foo()
+
+    assert foo.validate() is None
+
+
+def test_model_property_validation():
+    class Foo(Model):
+        a: int
+        b: dict
+
+        @property
+        def a(self):
+            return self.b['c']
+
+        def validate_a(self, value):
+            if value <= 0:
+                raise ValidationError()
+            return value
+
+    foo = Foo(b={'c': 0})
+
+    with pytest.raises(ValidationError):
+        foo.validate()
 
 
 def test_model_ignores_private_attrs():

@@ -96,7 +96,8 @@ class Model(metaclass=BaseModel):
         if len(self_fields) != len(other_fields):
             return False
 
-        for name, value, _ in self_fields:
+        for name, _ in self_fields:
+            value = getattr(self, name)
             try:
                 if value != get_func(other, name):
                     return False
@@ -107,7 +108,8 @@ class Model(metaclass=BaseModel):
 
     def __repr__(self) -> str:
         attrs = ', '.join(
-            '{name}={value!r}'.format(name=name, value=value) for name, value, _ in self._get_fields()
+            '{name}={value!r}'.format(name=name, value=getattr(self, name))
+            for name, _ in self._get_fields()
         )
         return '{class_name}({attrs})'.format(class_name=type(self).__name__, attrs=attrs)
 
@@ -121,7 +123,7 @@ class Model(metaclass=BaseModel):
 
     def _get_fields(self) -> Iterator[Tuple[str, Any, ModelField]]:
         return (
-            (field_name, getattr(self, field_name), self._meta.descriptors[field_name])  # type: ignore
+            (field_name, self._meta.descriptors[field_name])  # type: ignore
             for field_name in self._meta.fields  # type: ignore
         )
 
@@ -144,10 +146,11 @@ class Model(metaclass=BaseModel):
         return not bool(value)
 
     def convert_fields(self):
-        for name, value, descriptor in self._get_fields():
+        for name, descriptor in self._get_fields():
             if descriptor.is_property:
                 continue
 
+            value = getattr(self, name)
             new_value = descriptor.convert_to_type(self, value)
             setattr(self, name, new_value)
 
@@ -155,7 +158,11 @@ class Model(metaclass=BaseModel):
         self._validation_count += 1
         self.convert_fields()
 
-        for name, value, descriptor in self._get_fields():
+        for name, descriptor in self._get_fields():
+            if descriptor.is_property and descriptor._validate is None:
+                continue
+
+            value = getattr(self, name)
             try:
                 value = descriptor.validate(self, value)
             except ValidationError:
