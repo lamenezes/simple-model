@@ -2,6 +2,11 @@
 Changes
 =======
 
+2.3.1 / 2018-11-28
+==================
+
+* Fix type conversion to avoid converting when the field value is a subclass of the expected type
+
 2.3.0 / 2018-10-24
 ==================
 
