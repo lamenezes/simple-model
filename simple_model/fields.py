@@ -97,6 +97,9 @@ class ModelField:
 
             return iterable_field_class(values)
 
+        if isinstance(value, field_class):
+            return value
+
         return field_class(value)
 
     def validate(self, instance, value):

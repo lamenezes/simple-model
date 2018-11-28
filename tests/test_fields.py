@@ -1,4 +1,5 @@
 import typing
+from datetime import datetime
 from unittest import mock
 
 import pytest
@@ -227,3 +228,13 @@ def test_model_field_conversion_iterable_with_type_var(model_field):
     value = ['foo']
 
     assert model_field.convert_to_type(None, value) == value
+
+
+def test_model_field_convert_to_type_do_nothing_if_field_is_already_of_expected_type(model_field):
+    class MyDateTime(datetime):
+        pass
+
+    model_field._type = datetime
+    value = MyDateTime(2016, 6, 6)
+
+    assert model_field.convert_to_type(None, value) is value
