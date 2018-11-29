@@ -121,7 +121,7 @@ class Model(metaclass=BaseModel):
             if descriptor and not descriptor.is_property:
                 raise
 
-    def _get_fields(self) -> Iterator[Tuple[str, Any, ModelField]]:
+    def _get_fields(self) -> Iterator[Tuple[str, ModelField]]:
         return (
             (field_name, self._meta.descriptors[field_name])  # type: ignore
             for field_name in self._meta.fields  # type: ignore
