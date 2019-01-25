@@ -68,8 +68,8 @@ to create instances:
     'John Doe'
 
 As you have noticed we haven't informed a value for field `is_active`, but the model
-was still created. That's becaused we've set a default value of `True` for it and
-the model takes care of assinging it automatically to the field:
+was still created. That's because we've set a default value of `True` for it and
+the model takes care of assigning it automatically to the field:
 
 .. code:: python
 
@@ -167,8 +167,8 @@ Let's test it:
 It is important to note that models don't validate types. Currently types are used
 for field value conversion.
 
-Simple model also supports cleaning the field values by defining custom methods
-named `clean_` followed by the attribute name:
+The `validate` method also supports cleaning the field values by defining custom transformations
+in the `validate_` methods:
 
 .. code:: python
 
@@ -176,7 +176,7 @@ named `clean_` followed by the attribute name:
         age: int
         name: str
 
-        def clean_name(self, name):
+        def validate_name(self, name):
             return name.strip()
 
     >>> person = Person(age=18.0, name='John Doe ')
@@ -184,7 +184,7 @@ named `clean_` followed by the attribute name:
     'John Doe '
     >> person.age
     18.0
-    >>> person.clean()
+    >>> person.validate()
     >>> person.name
     'John Doe'
     >>> person.age  # all attributes are converted to its type before cleaning
