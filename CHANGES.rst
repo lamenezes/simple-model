@@ -7,11 +7,14 @@ Changes
 
 * Move BaseModel metaclass black magic to a separate module (improve Model code readability)
 * Add Model.as_dict() helper function to make it easier to convert models to dict
+* Change Model._validation_count (int) to Model._is_valid (bool) to make model validation handling more simple
+
 
 2.3.3 / 2018-11-29
 ==================
 
 * Fix type hints
+
 
 2.3.2 / 2018-11-28
 ==================
@@ -22,6 +25,7 @@ Changes
 ==================
 
 * Fix type conversion to avoid converting when the field value is a subclass of the expected type
+
 
 2.3.0 / 2018-10-24
 ==================

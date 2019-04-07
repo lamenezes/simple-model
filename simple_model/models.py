@@ -8,7 +8,7 @@ from .utils import getkey
 
 class Model(metaclass=BaseModel):
     def __init__(self, **kwargs):
-        self._validation_count = 0
+        self._is_valid = False
 
         for field_name in self._meta.fields:
             descriptor = self._meta.descriptors[field_name]
@@ -100,7 +100,7 @@ class Model(metaclass=BaseModel):
             setattr(self, name, new_value)
 
     def validate(self, raise_exception: bool = True) -> Union[None, bool]:
-        self._validation_count += 1
+        self._is_valid = True
         self.convert_fields()
 
         for name, descriptor in self._get_fields():
@@ -111,9 +111,13 @@ class Model(metaclass=BaseModel):
             try:
                 value = descriptor.validate(self, value)
             except ValidationError:
+                self._is_valid = False
                 if raise_exception:
                     raise
                 return False
+            except Exception:
+                self._is_valid = False
+                raise
 
             setattr(self, name, value)
 

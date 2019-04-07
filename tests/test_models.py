@@ -764,3 +764,14 @@ def test_model_as_dict(model):
     assert d
     assert isinstance(d, dict)
     assert d == to_dict(model)
+
+
+def test_model_validate_unexpected_exception(model):
+    descriptor_mock = mock.Mock()
+    descriptor_mock.validate.side_effect = Exception
+    model._get_fields = mock.Mock(return_value=[('foo', descriptor_mock)])
+
+    with pytest.raises(Exception):
+        model.validate()
+
+    assert model._is_valid is False
