@@ -6,6 +6,7 @@ Changes
 ==================
 
 * Move BaseModel metaclass black magic to a separate module (improve Model code readability)
+* Add Model.as_dict() helper function to make it easier to convert models to dict
 
 2.3.3 / 2018-11-29
 ==================

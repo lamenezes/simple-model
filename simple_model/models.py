@@ -118,3 +118,7 @@ class Model(metaclass=BaseModel):
             setattr(self, name, value)
 
         return None if raise_exception else True
+
+    def as_dict(self):
+        from .converters import to_dict
+        return to_dict(self)

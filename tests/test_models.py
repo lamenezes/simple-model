@@ -3,7 +3,7 @@ import typing
 from datetime import datetime
 from unittest import mock
 
-from simple_model import Model
+from simple_model import Model, to_dict
 from simple_model.exceptions import EmptyField, ValidationError
 from simple_model.fields import ModelField
 
@@ -754,3 +754,13 @@ def test_model_ignores_private_attrs():
     assert model._PrivateModel__private is None
     with pytest.raises(AttributeError):
         model._PrivateModel__another_private
+
+
+def test_model_as_dict(model):
+    model.validate()
+
+    d = model.as_dict()
+
+    assert d
+    assert isinstance(d, dict)
+    assert d == to_dict(model)
