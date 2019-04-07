@@ -2,6 +2,11 @@
 Changes
 =======
 
+2.4.0 / XXXX-XX-XX
+==================
+
+* Move BaseModel metaclass black magic to a separate module (improve Model code readability)
+
 2.3.3 / 2018-11-29
 ==================
 
