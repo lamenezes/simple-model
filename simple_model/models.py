@@ -120,5 +120,8 @@ class Model(metaclass=BaseModel):
         return None if raise_exception else True
 
     def as_dict(self):
+        """
+        Returns the model as a dict
+        """
         from .converters import to_dict
         return to_dict(self)
