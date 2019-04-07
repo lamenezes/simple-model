@@ -5,9 +5,10 @@ Changes
 2.4.0 / XXXX-XX-XX
 ==================
 
-* Move BaseModel metaclass black magic to a separate module (improve Model code readability)
 * Add Model.as_dict() helper function to make it easier to convert models to dict
+* Add a first implementation of the lazy validation model (LazyModel)
 * Change Model._validation_count (int) to Model._is_valid (bool) to make model validation handling more simple
+* Move BaseModel metaclass black magic to a separate module (improve Model code readability)
 
 
 2.3.3 / 2018-11-29

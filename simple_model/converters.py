@@ -1,8 +1,8 @@
-from .models import Model
+from .models import BaseModel
 
 
-def to_dict(model: Model):
-    if not isinstance(model, Model):
+def to_dict(model: BaseModel):
+    if not isinstance(model, BaseModel):
         raise TypeError('First argument must be of class type simple_model.Model')
 
     assert model._is_valid, 'model.validate() must be run before conversion'

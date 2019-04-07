@@ -6,6 +6,7 @@ from unittest import mock
 from simple_model import Model, to_dict
 from simple_model.exceptions import EmptyField, ValidationError
 from simple_model.fields import ModelField
+from simple_model.models import LazyModel
 
 from .conftest import MyModel
 
@@ -129,6 +130,7 @@ def test_base_model_validate_and_clean(model_clean_validate_foo):
 
     assert model_clean_validate_foo.foo == 'foo'
     assert model_clean_validate_foo.bar == 'bar'
+    assert model_clean_validate_foo._is_valid is True
 
 
 def test_base_model_validate_fail(model):
@@ -693,16 +695,6 @@ def test_model_property_setter():
         foo.validate()
 
 
-def test_model_property_setter_attribute_error():
-    class Foo(Model):
-        a: str
-
-    with mock.patch('simple_model.models.super') as mock_super:
-        mock_super.side_effect = AttributeError
-        with pytest.raises(AttributeError):
-            Foo(a=1)
-
-
 def test_model_property_is_not_called_on_validation_unless_necessary():
     class Foo(Model):
         a: str
@@ -756,7 +748,7 @@ def test_model_ignores_private_attrs():
         model._PrivateModel__another_private
 
 
-def test_model_as_dict(model):
+def test_model_as_dict_validated(model):
     model.validate()
 
     d = model.as_dict()
@@ -775,3 +767,33 @@ def test_model_validate_unexpected_exception(model):
         model.validate()
 
     assert model._is_valid is False
+
+
+def test_lazy_model_auto_validation_on_getattr():
+    class FooModel(LazyModel):
+        foo: str
+
+    lazy_model = FooModel()
+
+    with pytest.raises(EmptyField):
+        lazy_model.foo
+
+
+def test_lazy_model_auto_invalidation_on_setattr():
+    class FooModel(LazyModel):
+        foo: str
+
+    model = FooModel(foo='bar')
+    model._is_valid = True
+
+    model.foo = None
+    assert model._is_valid is False
+
+
+def test_lazy_model_as_dict():
+    class FooModel(LazyModel):
+        foo: str
+
+    model = FooModel(foo='foo')
+
+    assert model.as_dict()

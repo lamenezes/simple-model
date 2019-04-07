@@ -4,7 +4,7 @@ from .fields import ModelField, Unset
 from .utils import is_not_special_object, is_private_attribute
 
 
-class BaseModel(type):
+class ModelMetaClass(type):
     _field_class = ModelField
 
     @classmethod
@@ -30,7 +30,7 @@ class BaseModel(type):
 
         # do not perform initialization for Model class
         # only initialize Model subclasses
-        parents = [base for base in bases if isinstance(base, BaseModel)]
+        parents = [base for base in bases if isinstance(base, ModelMetaClass)]
         if not parents:
             return super_new(cls, name, bases, attrs)
 
@@ -55,5 +55,6 @@ class BaseModel(type):
             meta.descriptors[field_name] = field
 
         new_class._meta = meta
+        new_class._is_valid = False
 
         return new_class

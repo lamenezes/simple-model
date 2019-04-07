@@ -16,7 +16,7 @@ class ModelField:
         self.is_property = isinstance(getattr(model_class, name, None), property)
 
         try:
-            self._validate = getattr(model_class, 'validate_{}'.format(name))
+            self._validate = object.__getattribute__(model_class, 'validate_{}'.format(name))
         except AttributeError:
             self._validate = None
 
