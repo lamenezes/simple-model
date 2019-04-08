@@ -2,7 +2,7 @@
 Changes
 =======
 
-2.4.0 / XXXX-XX-XX
+2.4.0 / 2019-04-08
 ==================
 
 * Add Model.as_dict() helper function to make it easier to convert models to dict
