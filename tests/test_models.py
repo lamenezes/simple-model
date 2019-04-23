@@ -797,3 +797,13 @@ def test_lazy_model_as_dict():
     model = FooModel(foo='foo')
 
     assert model.as_dict()
+
+
+def test_model_subclass_inheritance_wont_consider_is_valid_as_field():
+    class SubModel(MyModel):
+        pass
+
+    model = SubModel()
+
+    assert model._is_valid is False
+    assert '_is_valid' not in model._meta.fields

@@ -2,6 +2,12 @@
 Changes
 =======
 
+2.4.1 / 2019-04-23
+==================
+
+* Fix model inheritance to keep _is_valid out of model fields
+
+
 2.4.0 / 2019-04-08
 ==================
 
@@ -21,6 +27,7 @@ Changes
 ==================
 
 * Fix model validation to avoid accessing properties unless it's really necessary
+
 
 2.3.1 / 2018-11-28
 ==================
