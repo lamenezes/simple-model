@@ -1,6 +1,7 @@
 import pytest
 
 from simple_model import Model, to_dict
+from tests.conftest import MyModel
 
 
 def test_model_to_dict_invalid_argument():
@@ -60,3 +61,20 @@ def test_model_to_dict_property():
     model.validate()
 
     assert to_dict(model) == expected
+
+
+def test_model_to_dict_inheritance(model_data):
+    class ChildModel(MyModel):
+        pass
+
+    model = ChildModel(**model_data)
+
+    as_dict_model = {
+        'foo': 'foo',
+        'bar': 'bar',
+        'baz': '',
+        'qux': '',
+    }
+    model.validate()
+
+    assert to_dict(model) == as_dict_model

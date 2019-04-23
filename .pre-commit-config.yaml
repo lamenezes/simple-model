@@ -1,5 +1,6 @@
+repos:
 -   repo: git@github.com:pre-commit/pre-commit-hooks
-    sha: v0.9.5
+    rev: v2.2.1
     hooks:
     - id: debug-statements
     - id: trailing-whitespace

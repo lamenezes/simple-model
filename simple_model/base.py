@@ -23,6 +23,7 @@ class ModelMetaClass(type):
     def _get_fields(cls, attrs, hints):
         fields = set(hints) | attrs
         fields.discard('Meta')
+        fields.discard('_is_valid')
         return tuple(field for field in fields if not is_private_attribute(field))
 
     def __new__(cls, name, bases, attrs, **kwargs):
