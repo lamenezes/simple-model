@@ -2,6 +2,11 @@
 Changes
 =======
 
+2.4.2 / 2019-04-26
+==================
+
+* Fix model field custom validate method on subclass of Model subclasses
+
 2.4.1 / 2019-04-23
 ==================
 
