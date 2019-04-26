@@ -807,3 +807,13 @@ def test_model_subclass_inheritance_wont_consider_is_valid_as_field():
 
     assert model._is_valid is False
     assert '_is_valid' not in model._meta.fields
+
+
+def test_model_super_validate_is_called():
+    class SubModel(MyModel):
+        pass
+
+    model = SubModel(foo='f', bar='b')
+
+    with pytest.raises(ValidationError):
+        model.validate()
