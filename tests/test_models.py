@@ -233,7 +233,7 @@ def test_model_fields_validate_allow_empty_error(empty_value):
     with pytest.raises(EmptyField) as exc:
         MyModel(foo=empty_value, bar=empty_value).validate()
 
-    assert 'cannot be empty' in str(exc)
+    assert 'cannot be empty' in str(exc.value)
 
 
 def test_model_fields_field_validation(model):
@@ -315,7 +315,7 @@ def test_model_get_fields_invalid():
     with pytest.raises(AssertionError) as exc:
         type('FieldlessModel', (Model,), {})
 
-    assert 'model must define class attributes' in str(exc)
+    assert 'model must define class attributes' in str(exc.value)
 
 
 def test_model_with_private_attrs():
