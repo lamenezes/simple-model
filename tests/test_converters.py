@@ -1,3 +1,5 @@
+from enum import Enum
+
 import pytest
 
 from simple_model import Model, to_dict
@@ -78,3 +80,18 @@ def test_model_to_dict_inheritance(model_data):
     model.validate()
 
     assert to_dict(model) == as_dict_model
+
+
+def test_model_to_dict_attribute_is_enum():
+    class Bar(Enum):
+        foo = 'foo'
+        bar = 'bar'
+
+    class FooBar(Model):
+        foo: str
+        bar: Bar
+
+    expected_dict = {'foo': 'foo', 'bar': 'bar'}
+    foo_bar = FooBar(foo='foo', bar=Bar.bar)
+    foo_bar.validate()
+    assert foo_bar.as_dict() == expected_dict

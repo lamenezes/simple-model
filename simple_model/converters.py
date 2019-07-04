@@ -1,3 +1,5 @@
+from enum import Enum
+
 from .models import BaseModel
 
 
@@ -10,6 +12,8 @@ def to_dict(model: BaseModel):
     d = {}
     for field_name, descriptor in model._get_fields():
         value = getattr(model, field_name)
+        if isinstance(value, Enum):
+            value = value.value
         d[field_name] = descriptor.to_python(value)
 
     return d

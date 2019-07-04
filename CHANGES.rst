@@ -2,6 +2,11 @@
 Changes
 =======
 
+2.4.3 / 2019-06-14
+==================
+
+* Fix model.as_dict() when model has enum attribute
+
 2.4.2 / 2019-04-26
 ==================
 
