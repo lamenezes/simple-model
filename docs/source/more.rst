@@ -97,7 +97,24 @@ TBD
 Converting models to dict
 =========================
 
-TBD
+To convert model to dict you should use `to_dict()`
+
+.. code-block:: python
+
+    from simple_model import Model
+    from simple_model.converters import to_dict
+
+    class Category(Model):
+        name: str
+        is_active: bool = False
+
+    category = Category(
+        name='clothing',
+        is_active=True,
+    )
+
+    to_dict(category)
+
 
 
 Creating models instances and classes from dicts
