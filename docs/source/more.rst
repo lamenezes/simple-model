@@ -116,6 +116,26 @@ To convert model to dict you should use `to_dict()`
     to_dict(category)
 
 
+You can convert models instances to dictionary using the method `.as_dict()`, you must run `.validate()` before conversion.
+This way is more recommended because you don't need to import `to_dict` to convert the instance
+
+.. code-block:: python
+
+    from simple_model import Model
+
+
+    class Category(Model):
+        name: str
+        is_active: bool = False
+
+    category = Category(
+        name='clothing',
+        is_active=True,
+    )
+
+    category.validate()
+    category.as_dict()
+
 
 Creating models instances and classes from dicts
 ================================================
